@@ -2,7 +2,10 @@
   Nosso primeiro programa de simulação de Sistemas Distribuídos
   Vamos simular N nodos, cada um conta o "tempo" independentemente
 
-  Tarefa 0: digitar, compilar e executar o programa exemplo, tempo.c
+  Tarefa 1: Fazer cada um dos processos testar o seguinte no anel.
+            Implemente o teste com a função status() do SMPL e imprimir
+            (printf) o resultado de cada teste executado. Por exemplo:
+            “O processo i testou o processo j correto no tempo tal.”
 */
 
 #include "smpl.h"
@@ -25,11 +28,12 @@ typedef struct {
 ProcessType *process;
 
 int main(int argc, char *argv[]) {
-  static int N, // número de processos
-      token,    // processo que está executando
-      event, r, i;
+  static int N,               // número de processos
+      token,                  // processo que está executando
+      event, r, i, t, token2; // variaveis auxiliares
 
   static char fa_name[5];
+  const char *t_result;
 
   if (argc != 2) {
     puts("Uso correto: tempo <número de processos>");
@@ -51,6 +55,7 @@ int main(int argc, char *argv[]) {
 
   // inicializar processos
   process = (ProcessType *)malloc(sizeof(ProcessType) * N);
+
   for (i = 0; i < N; ++i) {
     memset(fa_name, '\0', 5);
     sprintf(fa_name, "%d", i);
@@ -74,8 +79,20 @@ int main(int argc, char *argv[]) {
     case TEST:
       if (status(process[token].id) != 0)
         break; // se processo falho, nao testa
-      printf("Processo %d vai testar no tempo %4.1f\n", token, time());
+      token2 = token;
+      printf("\n==========================================\n");
+      printf("Iniciando testes do processo %d\n", token);
+      token2 = (token2 + 1) % N;
+      if (token2 == token) {
+        printf("Existe apenas um processo!\n");
+        exit(1);
+      }
+      t = status(process[token2].id);
+      t_result = t == 0 ? "correto" : "falho";
+      printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
+             token2, time(), t_result);
       schedule(TEST, 30.0, token);
+      printf("==========================================\n");
       break;
     case FAULT:
       r = request(process[token].id, token, 0);
