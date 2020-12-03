@@ -4,4 +4,16 @@ layout: default
 
 <body>
     <h1>Trabalho Prático 1</h1>
+    <p><b>Especificação:</b> Implemente o algoritmo VRing no ambiente de simulação SMPL, e mostre resultados para
+        diversos valores de N e diversos eventos - um evento de cada vez, um evento só ocorre depois do evento anterior
+        ser diagnosticado. Para cada evento mostre claramente o número de testes executados e a latência para completar
+        o diagnóstico do evento. Cada nodo mantém o vetor STATE[0..N-1] de contadores de eventos, inicializado em -1
+        (estado “unknown”). Assume-se que os processos são inicializados sem-falha, a entrada correspondente ao próprio
+        processo no vetor STATE[] do testador é setada para zero. Ao descobrir um novo evento em um nodo testado, o
+        testador incrementa a entrada correspondente no vetor STATE[].</p>
+    <p>Para a transferência de informações de diagnóstico lembre-se da estratégia do VRing: quando um processo sem-falha
+        testa outro processo sem-falha obtém informações sobre os estados de todos os processos que não testou no
+        intervalo de testes corrente. É importante comparar as entradas correspondentes dos vetores STATE (testador e
+        testado) para saber se o testado tem alguma novidade. Se o valor da entrada for maior no vetor STATE do processo
+        testado, então copia a informação.</p>
 </body>
