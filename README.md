@@ -1,8 +1,15 @@
-# 
+# Sistemas Distribuídos
+
+Página dedicada à publicação dos trabalhos práticos da disciplina de Sistemas Distribuídos:
+
+* [Trabalho Prático 0](./trab0)
+* [Trabalho Prático 1](./trab1)
+
+
+
+* * *
 
 Text can be **bold**, _italic_, or ~~strikethrough~~.
-
-[Link to another page](./another-page.html).
 
 There should be whitespace between paragraphs.
 
