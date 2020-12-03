@@ -2,13 +2,15 @@
   Nosso primeiro programa de simulação de Sistemas Distribuídos
   Vamos simular N nodos, cada um conta o "tempo" independentemente
 
-  Tarefa 4: Quando um processo correto testa outro processo correto
-            obtém as informações de diagnóstico do processo testado
-            sobre todos os processos do sistema exceto aqueles que
-            testou nesta rodada, além do próprio testador.
+  Tarefa 3: Cada processo mantém localmente o vetor State[N].
+            Inicializa o State[N] com -1 (indicando estado “unknown”)
+            para todos os demais processos e 0 para o próprio processo.
+            Nesta tarefa ao executar um teste, o processo atualiza a
+            entrada correspondente no vetor State[N]. Em cada intervalo
+            de testes, mostre o vetor State[N].
 */
 
-#include "smpl.h"
+#include "../../lib/smpl.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -43,7 +45,7 @@ int main(int argc, char *argv[]) {
 
   N = atoi(argv[1]);
   if (N < 2) {
-    printf("O número mínimo de processos é 2!\n", N);
+    printf("O número mínimo de processos é 2!\n");
     exit(1);
   } else {
     printf("Este programa foi executado para N=%d processos\n", N);
@@ -62,7 +64,7 @@ int main(int argc, char *argv[]) {
     process[i].id = facility(fa_name, 1);
     process[i].state = malloc(sizeof(int) * N);
     for (j = 0; j < N; ++j) {
-      process[i].state[j] = -1;
+      process[i].state[j] = i == j ? 0 : -1;
     }
   }
 
@@ -97,20 +99,9 @@ int main(int argc, char *argv[]) {
         t_result = r == 0 ? "correto" : "falho";
         printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
                token2, time(), t_result);
-        if (r == 0) {
-          printf(
-              "Atualizando state do processo %d com o state do processo %d\n",
-              token, token2);
-          for (i = (token2 + 1) % N;; i = (i + 1) % N) {
-            if (i == token2 || i == token)
-              break;
-            printf("state[%d] = %d\n", i, process[token2].state[i]);
-            process[token].state[i] = process[token2].state[i];
-          }
-        }
       } while (r != 0);
       schedule(TEST, 30.0, token);
-      printf("State do processo %d: ", token);
+      printf("Status do processo %d: ", token);
       for (i = 0; i < N; ++i) {
         printf("%d ", process[token].state[i]);
       }

@@ -2,13 +2,10 @@
   Nosso primeiro programa de simulação de Sistemas Distribuídos
   Vamos simular N nodos, cada um conta o "tempo" independentemente
 
-  Tarefa 2: Cada processo correto executa testes até achar outro
-            processo correto. Lembre-se de tratar o caso em que
-            todos os demais processos estão falhos. Imprimir os
-            testes e resultados.
+  Tarefa 0: digitar, compilar e executar o programa exemplo, tempo.c
 */
 
-#include "smpl.h"
+#include "../../lib/smpl.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,12 +25,11 @@ typedef struct {
 ProcessType *process;
 
 int main(int argc, char *argv[]) {
-  static int N,                  // número de processos
-      token,                     // processo que está executando
-      event, r, i, j, t, token2; // variaveis auxiliares
+  static int N, // número de processos
+      token,    // processo que está executando
+      event, r, i;
 
   static char fa_name[5];
-  const char *t_result;
 
   if (argc != 2) {
     puts("Uso correto: tempo <número de processos>");
@@ -42,7 +38,7 @@ int main(int argc, char *argv[]) {
 
   N = atoi(argv[1]);
   if (N < 2) {
-    printf("O número mínimo de processos é 2!\n", N);
+    printf("O número mínimo de processos é 2!\n");
     exit(1);
   } else {
     printf("Este programa foi executado para N=%d processos\n", N);
@@ -55,7 +51,6 @@ int main(int argc, char *argv[]) {
 
   // inicializar processos
   process = (ProcessType *)malloc(sizeof(ProcessType) * N);
-
   for (i = 0; i < N; ++i) {
     memset(fa_name, '\0', 5);
     sprintf(fa_name, "%d", i);
@@ -79,35 +74,21 @@ int main(int argc, char *argv[]) {
     case TEST:
       if (status(process[token].id) != 0)
         break; // se processo falho, nao testa
-      token2 = token;
-      printf("\n==========================================\n");
-      printf("Iniciando testes do processo %d\n", token);
-      do {
-        token2 = (token2 + 1) % N;
-        if (token2 == token) {
-          printf("Todos os demais processos estão falhos!\n");
-          exit(1);
-        }
-        t = status(process[token2].id);
-        t_result = t == 0 ? "correto" : "falho";
-        printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
-               token2, time(), t_result);
-      } while (r != 0);
+      printf("Processo %d vai testar no tempo %4.1f\n", token, time());
       schedule(TEST, 30.0, token);
-      printf("==========================================\n");
       break;
     case FAULT:
       r = request(process[token].id, token, 0);
       if (r != 0) {
-        printf("\nNao foi possivel falhar o processo %d\n", token);
+        printf("Nao foi possivel falhar o processo %d\n", token);
         exit(1);
       } else {
-        printf("\nProcesso %d falhou no tempo %4.1f\n", token, time());
+        printf("Processo %d falhou no tempo %4.1f\n", token, time());
       }
       break;
     case RECOVERY:
       release(process[token].id, token);
-      printf("\nProcesso %d recuperou no tempo %4.1f\n", token, time());
+      printf("Processo %d recuperou no tempo %4.1f\n", token, time());
       schedule(TEST, 30.0, token);
       break;
     }
