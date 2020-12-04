@@ -9,22 +9,24 @@ title: Trabalho Prático 0
     <hr>
     <h2>Tarefa 0</h2>
     <p>Digitar, compilar e executar o programa exemplo, <a href="./src/tempo.c">tempo.c</a></p>
-    <p>Foram realizadas algumas alterações em relação ao programa original para garantir melhor legibilidade e resposta:
+    <p>Foram realizadas algumas alterações em relação ao programa original para garantir melhor legibilidade do código e
+        resposta ao usuário:
     </p>
-    <ol>
-        <li>Uma constante de configuração de tempo máximo de simulação
-            {% highlight c %}
-            // Tempo maximo de simulacao
-            #define MAX_TIME 150
-            {% endhighlight %}
-        </li>
-        <li>Uma checagem do parâmetro de entrada para evitar uma execução com menos de 2 processos:
-            {% highlight c %}
-            if (N < 2) { printf("O numero minimo de processos e 2!\n"); exit(1); } else { printf("Este programa foi
-                executado para N=%d processos\n", N); printf("O tempo maximo de simulacao e de %d\n", MAX_TIME); }
-                {% endhighlight %} </li>
-        <li></li>
-    </ol>
+    <p>1. Uma constante de configuração de tempo máximo de simulação:</p>
+    {% highlight c %}
+    // Tempo maximo de simulacao
+    #define MAX_TIME 150
+    {% endhighlight %}
+    <p>2. Uma checagem do parâmetro de entrada para evitar uma execução com menos de 2 processos:</p>
+    {% highlight c %}
+    if (N < 2) {
+        printf("O numero minimo de processos e 2!\n");
+        exit(1);
+    } else {
+        printf("Este programa foi executado para N=%d processos\n", N);
+        printf("O tempo maximo de simulacao e de %d\n", MAX_TIME);
+    }
+    {% endhighlight %}
     <hr>
     <h2>Tarefa 1</h2>
     <p>Fazer cada um dos processos testar o seguinte no anel. Implemente o teste com a função status() do SMPL e
