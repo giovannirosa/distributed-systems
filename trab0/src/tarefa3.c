@@ -1,13 +1,16 @@
-/* Autor: Giovanni Rosa, Última modifição: 01/12/2020
-  Nosso primeiro programa de simulação de Sistemas Distribuídos
-  Vamos simular N nodos, cada um conta o "tempo" independentemente
+/*
+  Autor: Giovanni Rosa
+  Ultima modificao: 03/12/2020
 
-  Tarefa 3: Cada processo mantém localmente o vetor State[N].
-            Inicializa o State[N] com -1 (indicando estado “unknown”)
-            para todos os demais processos e 0 para o próprio processo.
-            Nesta tarefa ao executar um teste, o processo atualiza a
-            entrada correspondente no vetor State[N]. Em cada intervalo
-            de testes, mostre o vetor State[N].
+Nosso primeiro programa de simulacao de Sistemas Distribuidos
+Vamos simular N nodos, cada um conta o "tempo" independentemente
+
+Tarefa 3: Cada processo mantem localmente o vetor State[N].
+          Inicializa o State[N] com -1 (indicando estado "unknown")
+          para todos os demais processos e 0 para o proprio processo.
+          Nesta tarefa ao executar um teste, o processo atualiza a
+          entrada correspondente no vetor State[N]. Em cada intervalo
+          de testes, mostre o vetor State[N].
 */
 
 #include "../../lib/smpl.h"
@@ -19,7 +22,7 @@
 #define FAULT 2
 #define RECOVERY 3
 
-// Tempo máximo de simulação
+// Tempo maximo de simulacao
 #define MAX_TIME 150
 
 // Descritor do processo
@@ -31,28 +34,28 @@ typedef struct {
 ProcessType *process;
 
 int main(int argc, char *argv[]) {
-  static int N,                  // número de processos
-      token,                     // processo que está executando
+  static int N,                  // numero de processos
+      token,                     // processo que esta executando
       event, r, i, j, t, token2; // variaveis auxiliares
 
   static char fa_name[5];
   const char *t_result;
 
   if (argc != 2) {
-    puts("Uso correto: tempo <número de processos>");
+    puts("Uso correto: tempo <numero de processos>");
     exit(1);
   }
 
   N = atoi(argv[1]);
   if (N < 2) {
-    printf("O número mínimo de processos é 2!\n");
+    printf("O numero minimo de processos e 2!\n");
     exit(1);
   } else {
     printf("Este programa foi executado para N=%d processos\n", N);
-    printf("O tempo máximo de simulação é de %d\n", MAX_TIME);
+    printf("O tempo maximo de simulacao e de %d\n", MAX_TIME);
   }
 
-  smpl(0, "Um exemplo de simulação");
+  smpl(0, "Um exemplo de simulacao");
   reset();
   stream(1);
 
@@ -70,7 +73,7 @@ int main(int argc, char *argv[]) {
 
   // escalonamento inicial de eventos
   // intervalo de testes de 10 unidades de tempo
-  // simulação começa no tempo zero e escalonar o primeiro teste de todos os
+  // simulacao comeca no tempo zero e escalonar o primeiro teste de todos os
   // processos no tempo 30
   for (i = 0; i < N; ++i) {
     schedule(TEST, 30.0, i);
@@ -91,7 +94,7 @@ int main(int argc, char *argv[]) {
       do {
         token2 = (token2 + 1) % N;
         if (token2 == token) {
-          printf("Todos os demais processos estão falhos!\n");
+          printf("Todos os demais processos estao falhos!\n");
           exit(1);
         }
         r = status(process[token2].id);

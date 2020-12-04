@@ -1,11 +1,14 @@
-/* Autor: Giovanni Rosa, Última modifição: 01/12/2020
-  Nosso primeiro programa de simulação de Sistemas Distribuídos
-  Vamos simular N nodos, cada um conta o "tempo" independentemente
+/*
+  Autor: Giovanni Rosa
+  Ultima modificao: 03/12/2020
 
-  Tarefa 1: Fazer cada um dos processos testar o seguinte no anel.
-            Implemente o teste com a função status() do SMPL e imprimir
-            (printf) o resultado de cada teste executado. Por exemplo:
-            “O processo i testou o processo j correto no tempo tal.”
+Nosso primeiro programa de simulacao de Sistemas Distribuidos
+Vamos simular N nodos, cada um conta o "tempo" independentemente
+
+Tarefa 1: Fazer cada um dos processos testar o seguinte no anel.
+          Implemente o teste com a funcao status() do SMPL e imprimir
+          (printf) o resultado de cada teste executado. Por exemplo:
+          "O processo i testou o processo j correto no tempo tal."
 */
 
 #include "../../lib/smpl.h"
@@ -17,7 +20,7 @@
 #define FAULT 2
 #define RECOVERY 3
 
-// Tempo máximo de simulação
+// Tempo maximo de simulacao
 #define MAX_TIME 150
 
 // Descritor do processo
@@ -28,28 +31,28 @@ typedef struct {
 ProcessType *process;
 
 int main(int argc, char *argv[]) {
-  static int N,               // número de processos
-      token,                  // processo que está executando
+  static int N,               // numero de processos
+      token,                  // processo que esta executando
       event, r, i, t, token2; // variaveis auxiliares
 
   static char fa_name[5];
   const char *t_result;
 
   if (argc != 2) {
-    puts("Uso correto: tempo <número de processos>");
+    puts("Uso correto: tempo <numero de processos>");
     exit(1);
   }
 
   N = atoi(argv[1]);
   if (N < 2) {
-    printf("O número mínimo de processos é 2!\n");
+    printf("O numero minimo de processos e 2!\n");
     exit(1);
   } else {
     printf("Este programa foi executado para N=%d processos\n", N);
-    printf("O tempo máximo de simulação é de %d\n", MAX_TIME);
+    printf("O tempo maximo de simulacao e de %d\n", MAX_TIME);
   }
 
-  smpl(0, "Um exemplo de simulação");
+  smpl(0, "Um exemplo de simulacao");
   reset();
   stream(1);
 
@@ -64,7 +67,7 @@ int main(int argc, char *argv[]) {
 
   // escalonamento inicial de eventos
   // intervalo de testes de 10 unidades de tempo
-  // simulação começa no tempo zero e escalonar o primeiro teste de todos os
+  // simulacao comeca no tempo zero e escalonar o primeiro teste de todos os
   // processos no tempo 30
   for (i = 0; i < N; ++i) {
     schedule(TEST, 30.0, i);
