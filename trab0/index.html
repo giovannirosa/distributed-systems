@@ -24,6 +24,25 @@ if (N < 2) {
     exit(1);
 }
 {% endhighlight %}
+<p>3. Melhorias de log.</p>
+<p>Um exemplo de log de execução para 2 processos:</p>
+{% highlight plaintext %}
+==========================================
+Execucao do programa "tempo.c"
+Numero de processos = 2
+Tempo maximo de simulacao = 150
+==========================================
+Processo 0 vai testar no tempo 30.0
+Processo 1 vai testar no tempo 30.0
+Processo 1 falhou no tempo 31.0
+Processo 0 vai testar no tempo 60.0
+Processo 1 recuperou no tempo 61.0
+Processo 0 vai testar no tempo 90.0
+Processo 1 vai testar no tempo 91.0
+Processo 0 vai testar no tempo 120.0
+Processo 1 vai testar no tempo 121.0
+Processo 0 vai testar no tempo 150.0
+{% endhighlight %}
     <hr>
     <h2>Tarefa 1</h2>
     <p>Fazer cada um dos processos testar o seguinte no anel. Implemente o teste com a função status() do SMPL e

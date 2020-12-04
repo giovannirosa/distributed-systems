@@ -41,11 +41,14 @@ int main(int argc, char *argv[]) {
 
   N = atoi(argv[1]);
   if (N < 2) {
-    printf("O numero minimo de processos e 2!\n");
+    puts("O numero minimo de processos e 2!");
     exit(1);
   } else {
-    printf("Este programa foi executado para N=%d processos\n", N);
-    printf("O tempo maximo de simulacao e de %d\n", MAX_TIME);
+    puts("==========================================");
+    puts("Execucao do programa \"tempo.c\"");
+    printf("Numero de processos = %d\n", N);
+    printf("Tempo maximo de simulacao = %d\n", MAX_TIME);
+    puts("==========================================");
   }
 
   smpl(0, "Um exemplo de simulacao");
