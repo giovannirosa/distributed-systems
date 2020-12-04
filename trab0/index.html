@@ -13,20 +13,17 @@ title: Trabalho Prático 0
         resposta ao usuário:
     </p>
     <p>1. Uma constante de configuração de tempo máximo de simulação:</p>
-    {% highlight c %}
-    // Tempo maximo de simulacao
-    #define MAX_TIME 150
-    {% endhighlight %}
+{% highlight c %}
+// Tempo maximo de simulacao
+#define MAX_TIME 150
+{% endhighlight %}
     <p>2. Uma checagem do parâmetro de entrada para evitar uma execução com menos de 2 processos:</p>
-    {% highlight c %}
-    if (N < 2) {
-        printf("O numero minimo de processos e 2!\n");
-        exit(1);
-    } else {
-        printf("Este programa foi executado para N=%d processos\n", N);
-        printf("O tempo maximo de simulacao e de %d\n", MAX_TIME);
-    }
-    {% endhighlight %}
+{% highlight c %}
+if (N < 2) {
+    printf("O numero minimo de processos e 2!\n");
+    exit(1);
+}
+{% endhighlight %}
     <hr>
     <h2>Tarefa 1</h2>
     <p>Fazer cada um dos processos testar o seguinte no anel. Implemente o teste com a função status() do SMPL e
