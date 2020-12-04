@@ -9,22 +9,30 @@ title: Trabalho Prático 0
     <hr>
     <h2>Tarefa 0</h2>
     <p>Digitar, compilar e executar o programa exemplo, <a href="./src/tempo.c">tempo.c</a></p>
+    <h2>Código</h2>
     <p>Foram realizadas algumas alterações em relação ao programa original para garantir melhor legibilidade do código e
         resposta ao usuário:
     </p>
-    <p>1. Uma constante de configuração de tempo máximo de simulação:</p>
+    <ol>
+        <li>
+            Uma constante de configuração de tempo máximo de simulação:
+        </li>
 {% highlight c %}
 // Tempo maximo de simulacao
 #define MAX_TIME 150
 {% endhighlight %}
-    <p>2. Uma checagem do parâmetro de entrada para evitar uma execução com menos de 2 processos:</p>
+        <li>
+            Uma checagem do parâmetro de entrada para evitar uma execução com menos de 2 processos:
+        </li>
 {% highlight c %}
 if (N < 2) {
     printf("O numero minimo de processos e 2!\n");
     exit(1);
 }
 {% endhighlight %}
-<p>3. Melhorias de log.</p>
+        <li>Melhorias de log.</li>
+    </ol>
+<h2>Log</h2>
 <p>Um exemplo de log de execução para 2 processos:</p>
 {% highlight plaintext %}
 ==========================================
