@@ -12,11 +12,18 @@ title: Trabalho Prático 0
     <p>Foram realizadas algumas alterações em relação ao programa original para garantir melhor legibilidade e resposta:
     </p>
     <ol>
-        <li>Foi adicionado uma constante de configuração de tempo máximo de simulação</li>
-        {% highlight c %}
-        // Tempo maximo de simulacao
-        #define MAX_TIME 150
-        {% endhighlight %}
+        <li>Uma constante de configuração de tempo máximo de simulação
+            {% highlight c %}
+            // Tempo maximo de simulacao
+            #define MAX_TIME 150
+            {% endhighlight %}
+        </li>
+        <li>Uma checagem do parâmetro de entrada para evitar uma execução com menos de 2 processos:
+            {% highlight c %}
+            if (N < 2) { printf("O numero minimo de processos e 2!\n"); exit(1); } else { printf("Este programa foi
+                executado para N=%d processos\n", N); printf("O tempo maximo de simulacao e de %d\n", MAX_TIME); }
+                {% endhighlight %} </li>
+        <li></li>
     </ol>
     <hr>
     <h2>Tarefa 1</h2>
