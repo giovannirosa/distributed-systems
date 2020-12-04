@@ -99,4 +99,9 @@ int main(int argc, char *argv[]) {
       break;
     }
   }
+
+  puts("==========================================");
+  puts("Programa finalizado com sucesso");
+  puts("Autor: Giovanni Rosa");
+  puts("==========================================");
 }
