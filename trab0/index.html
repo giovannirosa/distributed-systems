@@ -186,7 +186,7 @@ case TEST:
         <li>Melhorias de log.</li>
     </ol>
     <h3>Execução</h3>
-    <p>Um exemplo de log de execução para 2 processos:</p>
+    <p>Um exemplo de log de execução para 3 processos:</p>
 {% highlight plaintext %}
 Este programa foi executado para N=3 processos
 O tempo maximo de simulacao e de 150
@@ -266,7 +266,131 @@ Autor: Giovanni Rosa
     <p>Cada processo mantém localmente o vetor State[N]. Inicializa o State[N] com -1 (indicando estado “unknown”) para
         todos os demais processos e 0 para o próprio processo. Nesta tarefa ao executar um teste, o processo atualiza a
         entrada correspondente no vetor State[N]. Em cada intervalo de testes, mostre o vetor State[N].</p>
-    <a href="./src/tarefa3.c">tarefa3.c</a>
+    <h3>Código</h3>
+    <p>Fonte: <a href="./src/tarefa3.c">tarefa3.c</a></p>
+    <p>As seguintes alterações foram realizadas para cumprir os requisitos da tarefa:</p>
+    <ol>
+        <li>
+            O caso de teste foi modificado para testar o processo seguinte até que encontre um processo sem falha por meio de um
+            do-while:
+        </li>
+{% highlight c %}
+case TEST:
+    if (status(process[token].id) != 0)
+        break; // se processo falho, nao testa
+    token2 = token;
+    printf("\n==========================================\n");
+    printf("Iniciando testes do processo %d\n", token);
+    do {
+        token2 = (token2 + 1) % N;
+        if (token2 == token) {
+            printf("Todos os demais processos estao falhos!\n");
+            exit(1);
+        }
+        t = status(process[token2].id);
+        process[token].state[token2] = t;
+        t_result = t == 0 ? "correto" : "falho";
+        printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
+                token2, time(), t_result);
+    } while (t != 0);
+    schedule(TEST, 30.0, token);
+    printf("Status do processo %d: ", token);
+    for (i = 0; i < N; ++i) {
+        printf("%d[%d] ", i, process[token].state[i]);
+    }
+    printf("\n==========================================\n");
+    break;
+{% endhighlight %}
+        <li>Melhorias de log.</li>
+    </ol>
+    <h3>Execução</h3>
+    <p>Um exemplo de log de execução para 3 processos:</p>
+{% highlight plaintext %}
+Este programa foi executado para N=3 processos
+O tempo maximo de simulacao e de 150
+
+==========================================
+Iniciando testes do processo 0
+Processo 0 testou processo 1 no tempo 30.0: correto
+Status do processo 0: 0[0] 1[0] 2[-1] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+Processo 1 testou processo 2 no tempo 30.0: correto
+Status do processo 1: 0[-1] 1[0] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+Processo 2 testou processo 0 no tempo 30.0: correto
+Status do processo 2: 0[0] 1[-1] 2[0] 
+==========================================
+
+--> Processo 1 falhou no tempo 31.0
+
+==========================================
+Iniciando testes do processo 0
+Processo 0 testou processo 1 no tempo 60.0: falho
+Processo 0 testou processo 2 no tempo 60.0: correto
+Status do processo 0: 0[0] 1[1] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+Processo 2 testou processo 0 no tempo 60.0: correto
+Status do processo 2: 0[0] 1[-1] 2[0] 
+==========================================
+
+--> Processo 1 recuperou no tempo 61.0
+
+==========================================
+Iniciando testes do processo 0
+Processo 0 testou processo 1 no tempo 90.0: correto
+Status do processo 0: 0[0] 1[0] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+Processo 2 testou processo 0 no tempo 90.0: correto
+Status do processo 2: 0[0] 1[-1] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+Processo 1 testou processo 2 no tempo 91.0: correto
+Status do processo 1: 0[-1] 1[0] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 0
+Processo 0 testou processo 1 no tempo 120.0: correto
+Status do processo 0: 0[0] 1[0] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+Processo 2 testou processo 0 no tempo 120.0: correto
+Status do processo 2: 0[0] 1[-1] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+Processo 1 testou processo 2 no tempo 121.0: correto
+Status do processo 1: 0[-1] 1[0] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 0
+Processo 0 testou processo 1 no tempo 150.0: correto
+Status do processo 0: 0[0] 1[0] 2[0] 
+==========================================
+
+==========================================
+Programa finalizado com sucesso
+Autor: Giovanni Rosa
+==========================================
+{% endhighlight %}
     <hr>
     <h2>Tarefa 4</h2>
     <p>Quando um processo correto testa outro processo correto obtém as informações de diagnóstico do processo testado
