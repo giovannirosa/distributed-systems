@@ -69,12 +69,13 @@ Autor: Giovanni Rosa
     </p>
     <ol>
         <li>
-            O caso de teste foi modificado para testar o processo seguinte:
+            O caso de teste foi modificado para testar o processo seguinte utilizando "(token2 + 1) % N" para que o último
+            processo teste o primeiro:
         </li>
 {% highlight c %}
 case TEST:
     if (status(process[token].id) != 0)
-    break; // se processo falho, nao testa
+        break; // se processo falho, nao testa
     token2 = token;
     printf("\n==========================================\n");
     printf("Iniciando testes do processo %d\n", token);
@@ -109,14 +110,14 @@ Iniciando testes do processo 1
 Processo 1 testou processo 0 no tempo 30.0: correto
 ==========================================
 
-Processo 1 falhou no tempo 31.0
+--> Processo 1 falhou no tempo 31.0
 
 ==========================================
 Iniciando testes do processo 0
 Processo 0 testou processo 1 no tempo 60.0: falho
 ==========================================
 
-Processo 1 recuperou no tempo 61.0
+--> Processo 1 recuperou no tempo 61.0
 
 ==========================================
 Iniciando testes do processo 0
