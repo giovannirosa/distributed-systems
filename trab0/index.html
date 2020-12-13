@@ -282,6 +282,15 @@ typedef struct {
 } ProcessType;
 {% endhighlight %}
         <li>
+            O vetor de estados é inicializado com malloc, atribuindo o valor 0 para o próprio estado e -1 para os demais:
+        </li>
+{% highlight c %}
+process[i].state = malloc(sizeof(int) * N);
+for (j = 0; j < N; ++j) {
+    process[i].state[j] = i == j ? 0 : -1;
+}
+{% endhighlight %}
+        <li>
             O caso de teste foi modificado para atualizar o vetor de estados com o resultado do teste e imprimir o vetor de
             estados ao final dos testes realizados pelo processo:
         </li>
