@@ -271,8 +271,19 @@ Autor: Giovanni Rosa
     <p>As seguintes alterações foram realizadas para cumprir os requisitos da tarefa:</p>
     <ol>
         <li>
-            O caso de teste foi modificado para testar o processo seguinte até que encontre um processo sem falha por meio de um
-            do-while:
+            A estrutura de dados foi modificada para incluir um vetor de inteiros para representar o vetor de estados de cada
+            processo:
+        </li>
+{% highlight c %}
+// Descritor do processo
+typedef struct {
+    int id;     // identificador de facility do SMPL
+    int *state; // vetor de estados de cada processo
+} ProcessType;
+{% endhighlight %}
+        <li>
+            O caso de teste foi modificado para atualizar o vetor de estados com o resultado do teste e imprimir o vetor de
+            estados ao final dos testes realizados pelo processo:
         </li>
 {% highlight c %}
 case TEST:
