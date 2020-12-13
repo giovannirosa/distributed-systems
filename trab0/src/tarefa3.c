@@ -1,6 +1,6 @@
 /*
   Autor: Giovanni Rosa
-  Ultima modificao: 03/12/2020
+  Ultima modificao: 12/12/2020
 
 Nosso primeiro programa de simulacao de Sistemas Distribuidos
 Vamos simular N nodos, cada um conta o "tempo" independentemente
@@ -97,12 +97,12 @@ int main(int argc, char *argv[]) {
           printf("Todos os demais processos estao falhos!\n");
           exit(1);
         }
-        r = status(process[token2].id);
-        process[token].state[token2] = r;
-        t_result = r == 0 ? "correto" : "falho";
+        t = status(process[token2].id);
+        process[token].state[token2] = t;
+        t_result = t == 0 ? "correto" : "falho";
         printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
                token2, time(), t_result);
-      } while (r != 0);
+      } while (t != 0);
       schedule(TEST, 30.0, token);
       printf("Status do processo %d: ", token);
       for (i = 0; i < N; ++i) {
@@ -116,14 +116,19 @@ int main(int argc, char *argv[]) {
         printf("\nNao foi possivel falhar o processo %d\n", token);
         exit(1);
       } else {
-        printf("\nProcesso %d falhou no tempo %4.1f\n", token, time());
+        printf("\n--> Processo %d falhou no tempo %4.1f\n", token, time());
       }
       break;
     case RECOVERY:
       release(process[token].id, token);
-      printf("\nProcesso %d recuperou no tempo %4.1f\n", token, time());
+      printf("\n--> Processo %d recuperou no tempo %4.1f\n", token, time());
       schedule(TEST, 30.0, token);
       break;
     }
   }
+
+  puts("\n==========================================");
+  puts("Programa finalizado com sucesso");
+  puts("Autor: Giovanni Rosa");
+  puts("==========================================");
 }
