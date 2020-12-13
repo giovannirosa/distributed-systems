@@ -415,5 +415,163 @@ Autor: Giovanni Rosa
     <h2>Tarefa 4</h2>
     <p>Quando um processo correto testa outro processo correto obtém as informações de diagnóstico do processo testado
         sobre todos os processos do sistema exceto aqueles que testou nesta rodada, além do próprio testador.</p>
-    <a href="./src/tarefa4.c">tarefa4.c</a>
+    <h3>Código</h3>
+    <p>Fonte: <a href="./src/tarefa4.c">tarefa4.c</a></p>
+    <p>As seguintes alterações foram realizadas para cumprir os requisitos da tarefa:</p>
+    <ol>
+        <li>
+            O caso de teste foi modificado para atualizar o vetor de estados com o vetor de estados do primeiro processo sem
+            falha, exceto dos que já testou e ele mesmo:
+        </li>
+{% highlight c %}
+case TEST:
+    if (status(process[token].id) != 0)
+        break; // se processo falho, nao testa
+    token2 = token;
+    printf("\n==========================================\n");
+    printf("Iniciando testes do processo %d\n", token);
+    do {
+        token2 = (token2 + 1) % N;
+        if (token2 == token) {
+            printf("Todos os demais processos estao falhos!\n");
+            exit(1);
+        }
+        t = status(process[token2].id);
+        process[token].state[token2] = t;
+        t_result = t == 0 ? "correto" : "falho";
+        printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
+                token2, time(), t_result);
+        if (t == 0) {
+            printf(
+                "Atualizando state do processo %d com o state do processo %d\n",
+                token, token2);
+            for (i = (token2 + 1) % N;; i = (i + 1) % N) {
+                if (i == token2 || i == token)
+                    break;
+                printf("state[%d] = %d\n", i, process[token2].state[i]);
+                process[token].state[i] = process[token2].state[i];
+            }
+        }
+    } while (t != 0);
+    schedule(TEST, 30.0, token);
+    printf("State do processo %d: ", token);
+    for (i = 0; i < N; ++i) {
+        printf("%d ", process[token].state[i]);
+    }
+    printf("\n==========================================\n");
+    break;
+{% endhighlight %}
+        <li>Melhorias de log.</li>
+    </ol>
+    <h3>Execução</h3>
+    <p>Um exemplo de log de execução para 3 processos:</p>
+{% highlight plaintext %}
+Este programa foi executado para N=3 processos
+O tempo maximo de simulacao e de 150
+
+==========================================
+Iniciando testes do processo 0
+Processo 0 testou processo 1 no tempo 30.0: correto
+Atualizando state do processo 0 com o state do processo 1
+state[2] = -1
+State do processo 0: 0[-1] 1[0] 2[-1] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+Processo 1 testou processo 2 no tempo 30.0: correto
+Atualizando state do processo 1 com o state do processo 2
+state[0] = -1
+State do processo 1: 0[-1] 1[-1] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+Processo 2 testou processo 0 no tempo 30.0: correto
+Atualizando state do processo 2 com o state do processo 0
+state[1] = 0
+State do processo 2: 0[0] 1[0] 2[-1] 
+==========================================
+
+--> Processo 1 falhou no tempo 31.0
+
+==========================================
+Iniciando testes do processo 0
+Processo 0 testou processo 1 no tempo 60.0: falho
+Processo 0 testou processo 2 no tempo 60.0: correto
+Atualizando state do processo 0 com o state do processo 2
+State do processo 0: 0[-1] 1[1] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+Processo 2 testou processo 0 no tempo 60.0: correto
+Atualizando state do processo 2 com o state do processo 0
+state[1] = 1
+State do processo 2: 0[0] 1[1] 2[-1] 
+==========================================
+
+--> Processo 1 recuperou no tempo 61.0
+
+==========================================
+Iniciando testes do processo 0
+Processo 0 testou processo 1 no tempo 90.0: correto
+Atualizando state do processo 0 com o state do processo 1
+state[2] = 0
+State do processo 0: 0[-1] 1[0] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+Processo 2 testou processo 0 no tempo 90.0: correto
+Atualizando state do processo 2 com o state do processo 0
+state[1] = 0
+State do processo 2: 0[0] 1[0] 2[-1] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+Processo 1 testou processo 2 no tempo 91.0: correto
+Atualizando state do processo 1 com o state do processo 2
+state[0] = 0
+State do processo 1: 0[0] 1[-1] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 0
+Processo 0 testou processo 1 no tempo 120.0: correto
+Atualizando state do processo 0 com o state do processo 1
+state[2] = 0
+State do processo 0: 0[-1] 1[0] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+Processo 2 testou processo 0 no tempo 120.0: correto
+Atualizando state do processo 2 com o state do processo 0
+state[1] = 0
+State do processo 2: 0[0] 1[0] 2[-1] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+Processo 1 testou processo 2 no tempo 121.0: correto
+Atualizando state do processo 1 com o state do processo 2
+state[0] = 0
+State do processo 1: 0[0] 1[-1] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 0
+Processo 0 testou processo 1 no tempo 150.0: correto
+Atualizando state do processo 0 com o state do processo 1
+state[2] = 0
+State do processo 0: 0[-1] 1[0] 2[0] 
+==========================================
+
+==========================================
+Programa finalizado com sucesso
+Autor: Giovanni Rosa
+==========================================
+{% endhighlight %}
 </body>

@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
       schedule(TEST, 30.0, token);
       printf("State do processo %d: ", token);
       for (i = 0; i < N; ++i) {
-        printf("%d ", process[token].state[i]);
+        printf("%d[%d] ", i, process[token].state[i]);
       }
       printf("\n==========================================\n");
       break;
