@@ -1,6 +1,6 @@
 /*
   Autor: Giovanni Rosa
-  Ultima modificao: 12/12/2020
+  Ultima modificao: 13/12/2020
 
 Nosso primeiro programa de simulacao de Sistemas Distribuidos
 Vamos simular N nodos, cada um conta o "tempo" independentemente
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
   const char *t_result;
 
   if (argc != 2) {
-    puts("Uso correto: tempo <numero de processos>");
+    puts("Uso correto: tarefa4 <numero de processos>");
     exit(1);
   }
 
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     process[i].id = facility(fa_name, 1);
     process[i].state = malloc(sizeof(int) * N);
     for (j = 0; j < N; ++j) {
-      process[i].state[j] = -1;
+      process[i].state[j] = i == j ? 0 : -1;
     }
   }
 

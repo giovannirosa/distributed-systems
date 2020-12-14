@@ -2,20 +2,33 @@
   Autor: Giovanni Rosa
   Ultima modificao: 13/12/2020
 
-Nosso primeiro programa de simulacao de Sistemas Distribuidos
-Vamos simular N nodos, cada um conta o "tempo" independentemente
+Programa dedicado a implementacao do VRing como requisito para o Trabalho
+Pratico 1 da disciplina de Sistemas Distribuidos.
 
-Tarefa 3: Cada processo mantem localmente o vetor State[N].
-          Inicializa o State[N] com -1 (indicando estado "unknown")
-          para todos os demais processos e 0 para o proprio processo.
-          Nesta tarefa ao executar um teste, o processo atualiza a
-          entrada correspondente no vetor State[N]. Em cada intervalo
-          de testes, mostre o vetor State[N].
+Trabalho Pratico 1: Implemente o algoritmo VRing no ambiente de simulacao SMPL,
+e mostre resultados para diversos valores de N e diversos eventos - um evento em
+um processo de cada vez, um evento so ocorre depois do evento anterior ser
+diagnosticado. Para cada evento mostre claramente o numero de testes executados
+e a latencia para completar o diagnostico do evento. Cada nodo mantem o vetor
+STATE[0..N-1] de contadores de eventos, inicializado em -1 (estado "unknown").
+Assume-se que os processos sao inicializados sem-falha, a entrada correspondente
+ao proprio processo no vetor STATE[] do testador e setada para zero. Ao
+descobrir um novo evento em um nodo testado, o testador incrementa a entrada
+correspondente no vetor STATE[].
+
+Para a transferencia de informacoes de diagnostico lembre-se da estrategia do
+VRing: quando um processo sem-falha testa outro processo sem-falha obtem
+informacoes sobre os estados de todos os processos que nao testou no intervalo
+de testes corrente. E importante comparar as entradas correspondentes dos
+vetores STATE (testador e testado) para saber se o testado tem alguma novidade.
+Se o valor da entrada for maior no vetor STATE do processo testado, entao copia
+a informacao.
 */
 
 #include "../../lib/smpl.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 // Eventos
 #define TEST 1
@@ -31,6 +44,12 @@ typedef struct {
   int *state; // vetor de estados de cada processo
 } ProcessType;
 
+// Descritor do evento
+typedef struct {
+  int id;     // identificador de facility do SMPL
+  int *state; // vetor de estados de cada processo
+} Event;
+
 ProcessType *process;
 
 int main(int argc, char *argv[]) {
@@ -42,7 +61,7 @@ int main(int argc, char *argv[]) {
   const char *t_result;
 
   if (argc != 2) {
-    puts("Uso correto: tarefa3 <numero de processos>");
+    puts("Uso correto: vring <numero de processos>");
     exit(1);
   }
 
@@ -91,6 +110,11 @@ int main(int argc, char *argv[]) {
       token2 = token;
       printf("\n==========================================\n");
       printf("Iniciando testes do processo %d\n", token);
+      printf("State do processo %d: ", token);
+      for (i = 0; i < N; ++i) {
+        printf("%d[%d] ", i, process[token].state[i]);
+      }
+      puts("");
       do {
         token2 = (token2 + 1) % N;
         if (token2 == token) {
@@ -98,13 +122,45 @@ int main(int argc, char *argv[]) {
           exit(1);
         }
         t = status(process[token2].id);
-        process[token].state[token2] = t;
-        t_result = t == 0 ? "correto" : "falho";
+        t_result = t % 2 == 0 ? "correto" : "falho";
         printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
                token2, time(), t_result);
+        if (t == 0 && process[token].state[token2] % 2 != 0) {
+          ++process[token].state[token2];
+          printf("state[%d] atualizado para %d\n", token2,
+                 process[token].state[token2]);
+        } else if (t == 1 && process[token].state[token2] % 2 != 1) {
+          ++process[token].state[token2];
+          printf("state[%d] atualizado para %d\n", token2,
+                 process[token].state[token2]);
+        }
+        if (t % 2 == 0) { // se par esta sem falha
+          printf(
+              "Atualizando state do processo %d com o state do processo %d\n",
+              token, token2);
+          printf("State do processo %d: ", token2);
+          for (i = 0; i < N; ++i) {
+            printf("%d[%d] ", i, process[token2].state[i]);
+          }
+          puts("");
+          bool transfered = false;
+          for (i = (token2 + 1) % N;; i = (i + 1) % N) {
+            if (i == token2 || i == token)
+              break;
+            if (process[token2].state[i] > process[token].state[i]) {
+              transfered = true;
+              printf("Novidade encontrada, transferindo state[%d]...\n", i);
+              printf("state[%d] atualizado para %d\n", i, process[token2].state[i]);
+              process[token].state[i] = process[token2].state[i];
+            }
+          }
+          if (!transfered) {
+            puts("Nenhuma transferencia realizada");
+          }
+        }
       } while (t != 0);
       schedule(TEST, 30.0, token);
-      printf("Status do processo %d: ", token);
+      printf("State do processo %d: ", token);
       for (i = 0; i < N; ++i) {
         printf("%d[%d] ", i, process[token].state[i]);
       }
