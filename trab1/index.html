@@ -17,4 +17,198 @@ title: Trabalho Prático 1
         de testes corrente. É importante comparar as entradas correspondentes dos vetores STATE (testador e testado) para
         saber se o testado tem alguma novidade. Se o valor da entrada for maior no vetor STATE do processo testado, então
         copia a informação.</p>
+
+    <h2>Código</h2>
+    <p>Fonte: <a href="./src/vring.c">vring.c</a></p>
+    <p>O código foi escrito a partir do código da <a href="../trab0/src/tarefa4.c">tarefa4.c</a> do <a
+            href="../trab0/index.html">Trabalho Prático 0</a>. As seguintes alterações foram realizadas para cumprir os
+        requisitos da tarefa:</p>
+    <ol>
+        <li>
+            O caso de teste foi modificado para atualizar o vetor de estados com o vetor de estados do primeiro processo sem
+            falha, exceto dos que já testou e ele mesmo:
+        </li>
+{% highlight c %}
+case TEST:
+    if (status(process[token].id) != 0)
+    break; // se processo falho, nao testa
+    token2 = token;
+    printf("\n==========================================\n");
+    printf("Iniciando testes do processo %d\n", token);
+    print_state(N, token);
+    do {
+    token2 = (token2 + 1) % N;
+    if (token2 == token) {
+        printf("Todos os demais processos estao falhos!\n");
+        break;
+    }
+    t = status(process[token2].id);
+    t_result = t % 2 == 0 ? "correto" : "falho";
+    printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
+            token2, time(), t_result);
+    if (t == 0 && process[token].state[token2] % 2 != 0 ||
+        t == 1 && process[token].state[token2] % 2 != 1) {
+        ++process[token].state[token2];
+        printf("State[%d] atualizado para %d\n", token2,
+                process[token].state[token2]);
+        count_event_test(N, token, token2);
+        count_event_discovery(N, token, token2);
+    }
+    if (t % 2 == 0) { // se par esta sem falha, verifica novidades
+        check_state(N, token, token2);
+    }
+    } while (t != 0);
+    schedule(TEST, 30.0, token);
+    print_state(N, token);
+    printf("==========================================\n");
+    break;
+{% endhighlight %}
+        <li>Melhorias de log.</li>
+    </ol>
+    <h2>Execução</h2>
+    <p>Um exemplo de log de execução para 3 processos:</p>
+{% highlight plaintext %}
+Este programa foi executado para N=3 processos
+O tempo maximo de simulacao e de 100
+
+******************************************
+Iniciando round de testes 1
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[-1] 2[-1] 
+Processo 0 testou processo 1 no tempo 30.0: correto
+State[1] atualizado para 0
+Atualizando state do processo 0 com o state do processo 1
+State do processo 1: 0[-1] 1[0] 2[-1] 
+Nenhuma transferencia realizada
+State do processo 0: 0[0] 1[0] 2[-1] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+State do processo 1: 0[-1] 1[0] 2[-1] 
+Processo 1 testou processo 2 no tempo 30.0: correto
+State[2] atualizado para 0
+Atualizando state do processo 1 com o state do processo 2
+State do processo 2: 0[-1] 1[-1] 2[0] 
+Nenhuma transferencia realizada
+State do processo 1: 0[-1] 1[0] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+State do processo 2: 0[-1] 1[-1] 2[0] 
+Processo 2 testou processo 0 no tempo 30.0: correto
+State[0] atualizado para 0
+Atualizando state do processo 2 com o state do processo 0
+State do processo 0: 0[0] 1[0] 2[-1] 
+Novidade encontrada, transferindo state[1]...
+State[1] atualizado para 0
+State do processo 2: 0[0] 1[0] 2[0] 
+==========================================
+
+--> Event[1]: Processo 1 falhou no tempo 31.0
+
+******************************************
+Iniciando round de testes 2
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[0] 2[-1] 
+Processo 0 testou processo 1 no tempo 60.0: falho
+State[1] atualizado para 1
+Event[1] testado pelo processo 0
+Event[1] descoberto pelo processo 0
+Processo 0 testou processo 2 no tempo 60.0: correto
+State[2] atualizado para 0
+Atualizando state do processo 0 com o state do processo 2
+State do processo 2: 0[0] 1[0] 2[0] 
+Nenhuma transferencia realizada
+State do processo 0: 0[0] 1[1] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+State do processo 2: 0[0] 1[0] 2[0] 
+Processo 2 testou processo 0 no tempo 60.0: correto
+Atualizando state do processo 2 com o state do processo 0
+State do processo 0: 0[0] 1[1] 2[0] 
+Novidade encontrada, transferindo state[1]...
+State[1] atualizado para 1
+Event[1] descoberto pelo processo 2
+--> Diagnostico do evento 1 completo
+State do processo 2: 0[0] 1[1] 2[0] 
+==========================================
+
+--> Event[2]: Processo 1 recuperou no tempo 61.0
+
+******************************************
+Iniciando round de testes 3
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[1] 2[0] 
+Processo 0 testou processo 1 no tempo 90.0: correto
+State[1] atualizado para 2
+Event[2] testado pelo processo 0
+Event[2] descoberto pelo processo 0
+Atualizando state do processo 0 com o state do processo 1
+State do processo 1: 0[-1] 1[2] 2[-1] 
+Nenhuma transferencia realizada
+State do processo 0: 0[0] 1[2] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+State do processo 2: 0[0] 1[1] 2[0] 
+Processo 2 testou processo 0 no tempo 90.0: correto
+Atualizando state do processo 2 com o state do processo 0
+State do processo 0: 0[0] 1[2] 2[0] 
+Novidade encontrada, transferindo state[1]...
+State[1] atualizado para 2
+Event[2] descoberto pelo processo 2
+--> Diagnostico do evento 2 completo
+State do processo 2: 0[0] 1[2] 2[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+State do processo 1: 0[-1] 1[2] 2[-1] 
+Processo 1 testou processo 2 no tempo 91.0: correto
+State[2] atualizado para 0
+Atualizando state do processo 1 com o state do processo 2
+State do processo 2: 0[0] 1[2] 2[0] 
+Novidade encontrada, transferindo state[0]...
+State[0] atualizado para 0
+State do processo 1: 0[0] 1[2] 2[0] 
+==========================================
+
+******************************************
+Iniciando round de testes 4
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[2] 2[0] 
+Processo 0 testou processo 1 no tempo 120.0: correto
+Atualizando state do processo 0 com o state do processo 1
+State do processo 1: 0[0] 1[2] 2[0] 
+Nenhuma transferencia realizada
+State do processo 0: 0[0] 1[2] 2[0] 
+==========================================
+
+******************************************
+Simulacao encerrada
+
+==========================================
+
+Eventos durante a simulacao:
+Event[1]: FALHA | round 1 | tempo 031.0 | processo 1 | numero de testes de 1 | latencia de 1
+Event[2]: RECUP | round 2 | tempo 061.0 | processo 1 | numero de testes de 1 | latencia de 1
+
+==========================================
+Programa finalizado com sucesso
+Autor: Giovanni Rosa :)
+==========================================
+{% endhighlight %}
     </body>
