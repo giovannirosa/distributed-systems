@@ -51,7 +51,7 @@ typedef struct {
 // Evento atual da simulacao
 Event *event;
 
-// Vetor de eventos da simulacao
+// Lista de eventos da simulacao
 Array event_array;
 
 // Rodada atual da simulacao

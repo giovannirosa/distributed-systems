@@ -19,14 +19,31 @@ title: Trabalho Prático 1
         copia a informação.</p>
 
     <h2>Código</h2>
-    <p>Fonte: <a href="./src/vring.c">vring.c</a></p>
+    <p>Fontes: <a href="./src/vring.c">vring.c</a> <a href="./src/vring.h">vring.h</a></p></p>
     <p>O código foi escrito a partir do código da <a href="../trab0/src/tarefa4.c">tarefa4.c</a> do <a
             href="../trab0/index.html">Trabalho Prático 0</a>. As seguintes alterações foram realizadas para cumprir os
-        requisitos da tarefa:</p>
+        requisitos do Trabalho Prático 1:</p>
     <ol>
+        <li>Uma estrutura de dados para guardar as propriedades de cada evento:</li>
+{% highlight c %}
+// Descritor do evento
+typedef struct {
+    int id;        // identificador do evento
+    int e_round;   // round em que o evento ocorreu
+    double e_time; // tempo em que o evento ocorreu
+    int proc;      // numero do processo de origem
+    int type;      // tipo do evento: 0 = recuperacao, 1 = falha
+    int n_tests;   // numero de testes do evento
+    bool diag;     // se o evento ja foi diagnosticado
+    int latency;   // latencia para diagnosticar o evento
+} Event;
+{% endhighlight %}
+        <li>Inclusão de uma biblioteca própria de lista (<a href="../lib/array.c">array.c</a>) para guardar todos os eventos
+            durante a simulação.</li>
+        <li>Funções auxiliares para a simulação que estão descritas no <a href="./src/vring.h">vring.h</a></li>
         <li>
-            O caso de teste foi modificado para atualizar o vetor de estados com o vetor de estados do primeiro processo sem
-            falha, exceto dos que já testou e ele mesmo:
+            O caso de teste foi modificado para trabalhar com estados pares (corretos) e ímpares (falhos), além de contabilizar
+            as métricas dos eventos:
         </li>
 {% highlight c %}
 case TEST:

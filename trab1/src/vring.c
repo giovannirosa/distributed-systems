@@ -34,12 +34,13 @@ int main(int argc, char *argv[]) {
 
   const char *t_result;
 
+  // inicializacao da lista de eventos
   event_array = init_array();
 
   // processar entradas do usuario
   user_input(&N, argc, argv);
 
-  smpl(0, "Um exemplo de simulacao");
+  smpl(0, "Simulacao do Trabalho Pratico 1");
   reset();
   stream(1);
 
@@ -47,7 +48,7 @@ int main(int argc, char *argv[]) {
   init_process(N);
 
   // escalonamento inicial de eventos
-  // intervalo de testes de 10 unidades de tempo
+  // intervalo de testes de 30 unidades de tempo
   // simulacao comeca no tempo zero e escalonar o primeiro teste de todos os
   // processos no tempo 30
   schedule_events(N);
