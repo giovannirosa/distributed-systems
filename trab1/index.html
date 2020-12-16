@@ -143,11 +143,11 @@ if (event != NULL && !event->diag) {
         
         // se falha, reseta o vetor de estados pois é falha crash
         if (type == 1) {
-        for (int i = (token + 1) % N;; i = (i + 1) % N) {
-        if (i == token)
-        break;
-        process[token].state[i] = -1;
-        }
+            for (int i = (token + 1) % N;; i = (i + 1) % N) {
+                if (i == token)
+                    break;
+                process[token].state[i] = -1;
+            }
         }
         
         // atualiza o proprio state, apenas para controle do diagnostico, esse valor
