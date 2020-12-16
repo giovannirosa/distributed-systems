@@ -80,12 +80,103 @@ case TEST:
     printf("==========================================\n");
     break;
 {% endhighlight %}
-        <li>Melhorias de log.</li>
+        <li>A função de transferência de estados agora verifica se o processo testado correto possui novidades para efetuar a
+            transferência:</li>
+{% highlight c %}
+for (int i = (token2 + 1) % N;; i = (i + 1) % N) {
+    if (i == token)
+        break;
+    if (process[token2].state[i] > process[token].state[i]) {
+        transfered = true;
+        printf("Novidade encontrada, transferindo state[%d]...\n", i);
+        printf("State[%d] atualizado para %d\n", i, process[token2].state[i]);
+        process[token].state[i] = process[token2].state[i];
+        count_event_discovery(N, token, i);
+    }
+}
+{% endhighlight %}
+        <li>Assim que um evento é descoberto por um processo (por meio de testes ou transferências), a função verifica se todos
+            os processos já descobriram aquele evento para efetivar o seu diagnóstico:</li>
+{% highlight c %}
+if (event != NULL && event->latency == 0 && event->proc == token2) {
+    printf("Event[%d] descoberto pelo processo %d\n", event->id, token);
+    // checa se todos os processos sem falha descobriram o evento
+    bool diag = true;
+    for (int i = 0; i < N; ++i) {
+        if (process[i].state[token2] != -1 &&
+            process[i].state[token2] != process[token2].state[token2]) {
+        diag = false;
+        break;
+        }
+    }
+    if (diag) {
+        printf("--> Diagnostico do evento %d completo\n", event->id);
+        event->diag = true;
+        event->latency = sim_round - event->e_round;
+    }
+}
+{% endhighlight %}
+        <li>Uma verificação para garantir que o próximo evento (tanto falha quanto recuperação) só seja disparado quando o anterior for diagnosticado foi
+            incluída para garantir a estabilidade do programa, que não funciona com eventos simultâneos:</li>
+{% highlight c %}
+// se o evento anterior nao foi diagnosticado ainda, adia o evento para a
+// proxima rodada
+if (event != NULL && !event->diag) {
+    delay_event(FAULT, token);
+    break;
+}
+{% endhighlight %}
+        <li>Uma função para criação do evento (falha ou recuperação), onde para falhas o vetor de estados do processo em que o
+            evento ocorre é reinicializado. O próprio estado do processo é utilizado para verificação do diagnóstico. Ele não é
+            utilizado para transferências:</li>
+        {% highlight c %}
+        event = (Event *)malloc(sizeof(Event));
+        event->id = ++id_cont;
+        event->e_round = sim_round;
+        event->e_time = time();
+        event->proc = token;
+        event->type = type;
+        event->n_tests = 0;
+        event->diag = false;
+        event->latency = 0;
+        insert_array(event_array, event);
+        
+        // se falha, reseta o vetor de estados pois é falha crash
+        if (type == 1) {
+        for (int i = (token + 1) % N;; i = (i + 1) % N) {
+        if (i == token)
+        break;
+        process[token].state[i] = -1;
+        }
+        }
+        
+        // atualiza o proprio state, apenas para controle do diagnostico, esse valor
+        // nao e usado para transferencias
+        ++process[token].state[token];
+        {% endhighlight %}
+        <li>Melhorias de comentários e logs.</li>
     </ol>
-    <h2>Execução</h2>
-    <p>Os testes a seguir foram executados para demonstrar a corretude do programa. A rodada 0 indica o estado inicial dos
-        processos. A partir da rodada 1, os estados representados nas imagens representam àqueles dos finais da respectiva
-        rodada. Os símbolos de raio indicam falha, e os de coração representam recuperação.</p>
+    <h2>Execuç<li>Uma função para criação do evento (falha ou recuperação), onde para falhas o vetor de estados do processo em que o
+        evento ocorre é reinicializado. O próprio estado do processo é utilizado para verificação do diagnóstico. Ele não é
+        utilizado para transferências:</li>
+    {% highlight c %}
+    event = (Event *)malloc(sizeof(Event));
+    event->id = ++id_cont;
+    event->e_round = sim_round;
+    event->e_time = time();
+    event->proc = token;
+    event->type = type;
+    event->n_tests = 0;
+    event->diag = false;
+    event->latency = 0;
+    insert_array(event_array, event);
+
+    // se falha, reseta o vetor de estados pois é falha crash
+    if (type == 1) {
+        for (int i = (token + 1) % N;; i = (i + 1) % N) {
+        if (i == token)
+            break;
+       . Os símbolos de raio indicam falha, e os de coração representam recuperação.</p>
     <h3>Teste 1</h3>
     <p>Este teste foi executado para 3 processos, com o tempo máximo de simulação de 100. Os eventos agendados foram:</p>
     <ol>

@@ -166,11 +166,7 @@ void print_state(int N, int token) {
 void check_state(int N, int token, int token2) {
   printf("Atualizando state do processo %d com o state do processo %d\n", token,
          token2);
-  printf("State do processo %d: ", token2);
-  for (int i = 0; i < N; ++i) {
-    printf("%d[%d] ", i, process[token2].state[i]);
-  }
-  puts("");
+  print_state(N, token2);
   bool transfered = false;
   for (int i = (token2 + 1) % N;; i = (i + 1) % N) {
     if (i == token)
@@ -189,10 +185,6 @@ void check_state(int N, int token, int token2) {
 }
 
 void count_event_discovery(int N, int token, int token2) {
-  // if (event != NULL) {
-  //   printf("Event[%d] = %d %d %d\n", event->id, event->latency, event->proc,
-  //          token2);
-  // }
   if (event != NULL && event->latency == 0 && event->proc == token2) {
     printf("Event[%d] descoberto pelo processo %d\n", event->id, token);
     // checa se todos os processos sem falha descobriram o evento
@@ -255,7 +247,7 @@ void create_event(int N, int type, int token) {
   }
 
   // atualiza o proprio state, apenas para controle do diagnostico, esse valor
-  // nao e usado para transferencia
+  // nao e usado para transferencias
   ++process[token].state[token];
 }
 
