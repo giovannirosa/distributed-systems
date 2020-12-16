@@ -22,7 +22,7 @@ Declaracao do programa VRing
 #define RECOVERY 3
 
 // Tempo maximo de simulacao
-#define MAX_TIME 350
+#define MAX_TIME 250
 
 // Descritor do processo
 typedef struct {

@@ -309,7 +309,7 @@ void schedule_events(int N) {
     schedule(TEST, 30.0, i);
   }
   schedule(FAULT, 35.0, 0);
-  schedule(FAULT, 129.0, 3);
-  schedule(RECOVERY, 196.0, 3);
-  schedule(RECOVERY, 263.0, 0);
+  schedule(FAULT, 99.0, 2);
+  schedule(RECOVERY, 167.0, 0);
+  schedule(RECOVERY, 210.0, 2);
 }
