@@ -42,6 +42,24 @@ typedef struct {
         <li>Inclusão de uma biblioteca própria de lista (<a href="../lib/array.c">array.c</a>,<a href="../lib/array.h">array.h</a>) para guardar todos os eventos
             durante a simulação.</li>
         <li>Funções auxiliares para a simulação que estão descritas no <a href="./src/vring.h">vring.h</a></li>
+        <li>Uma função para contar os rounds, assim que todos os processos sem falha testarem naquela rodada:</li>
+{% highlight c %}
+bool all_tested = true;
+for (int i = 0; i < N; ++i) {
+    if (process[i].state[i] % 2 == 0 && !process[i].tested) {
+        all_tested = false;
+        break;
+    }
+}
+if (all_tested) {
+    ++sim_round;
+    puts("\n******************************************");
+    printf("Iniciando round de testes %d\n", sim_round);
+    for (int i = 0; i < N; ++i) {
+    process[i].tested = false;
+    }
+}
+{% endhighlight %}
         <li>
             O caso de teste foi modificado para trabalhar com estados pares (corretos) e ímpares (falhos), além de contabilizar
             as métricas dos eventos:
@@ -49,35 +67,40 @@ typedef struct {
 {% highlight c %}
 case TEST:
     if (status(process[token].id) != 0)
-    break; // se processo falho, nao testa
+        break; // se processo falho, nao testa
     token2 = token;
     printf("\n==========================================\n");
     printf("Iniciando testes do processo %d\n", token);
     print_state(N, token);
     do {
-    token2 = (token2 + 1) % N;
-    if (token2 == token) {
-        printf("Todos os demais processos estao falhos!\n");
-        break;
-    }
-    t = status(process[token2].id);
-    t_result = t % 2 == 0 ? "correto" : "falho";
-    printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
-            token2, time(), t_result);
-    if (t == 0 && process[token].state[token2] % 2 != 0 ||
-        t == 1 && process[token].state[token2] % 2 != 1) {
-        ++process[token].state[token2];
-        printf("State[%d] atualizado para %d\n", token2,
-                process[token].state[token2]);
-        count_event_test(N, token, token2);
-        count_event_discovery(N, token, token2);
-    }
-    if (t % 2 == 0) { // se par esta sem falha, verifica novidades
-        check_state(N, token, token2);
-    }
+        token2 = (token2 + 1) % N;
+        if (token2 == token) {
+            printf("Todos os demais processos estao falhos!\n");
+            break;
+        }
+        t = status(process[token2].id);
+        t_result = t % 2 == 0 ? "correto" : "falho";
+        printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
+                token2, time(), t_result);
+        if ((t == 0 && process[token].state[token2] % 2 != 0) ||
+            (t == 1 && process[token].state[token2] % 2 != 1)) {
+            if (process[token].state[token2] == -1) {
+                process[token].state[token2] = t;
+            } else {
+                ++process[token].state[token2];
+            }
+            printf("State[%d] atualizado para %d\n", token2,
+                    process[token].state[token2]);
+            count_event_test(N, token, token2);
+            count_event_discovery(N, token, token2, process[token].state[token2]);
+        }
+        if (t % 2 == 0) { // se par esta sem falha, verifica novidades
+            check_state(N, token, token2);
+        }
     } while (t != 0);
     schedule(TEST, 30.0, token);
     print_state(N, token);
+    process[token].tested = true;
     printf("==========================================\n");
     break;
 {% endhighlight %}
@@ -99,7 +122,8 @@ for (int i = (token2 + 1) % N;; i = (i + 1) % N) {
         <li>Assim que um evento é descoberto por um processo (por meio de testes ou transferências), a função verifica se todos
             os processos já descobriram aquele evento para efetivar o seu diagnóstico:</li>
 {% highlight c %}
-if (event != NULL && event->latency == 0 && event->proc == token2) {
+if (event != NULL && event->latency == -1 && event->proc == token2 &&
+      process[token2].state[token2] == state) {
     printf("Event[%d] descoberto pelo processo %d\n", event->id, token);
     // checa se todos os processos sem falha descobriram o evento
     bool diag = true;
