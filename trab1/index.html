@@ -38,7 +38,7 @@ typedef struct {
     int latency;   // latencia para diagnosticar o evento
 } Event;
 {% endhighlight %}
-        <li>Inclusão de uma biblioteca própria de lista (<a href="../lib/array.c">array.c</a>) para guardar todos os eventos
+        <li>Inclusão de uma biblioteca própria de lista (<a href="../lib/array.c">array.c</a>,<a href="../lib/array.h">array.h</a>) para guardar todos os eventos
             durante a simulação.</li>
         <li>Funções auxiliares para a simulação que estão descritas no <a href="./src/vring.h">vring.h</a></li>
         <li>
@@ -84,6 +84,7 @@ case TEST:
     </ol>
     <h2>Execução</h2>
     <p>Um exemplo de log de execução para 3 processos:</p>
+    <img src="./img/teste1.png" alt="teste 1">
 {% highlight plaintext %}
 Este programa foi executado para N=3 processos
 O tempo maximo de simulacao e de 100
