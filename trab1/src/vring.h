@@ -22,12 +22,13 @@ Declaracao do programa VRing
 #define RECOVERY 3
 
 // Tempo maximo de simulacao
-#define MAX_TIME 100
+#define MAX_TIME 350
 
 // Descritor do processo
 typedef struct {
-  int id;     // identificador de facility do SMPL
-  int *state; // vetor de estados de cada processo
+  int id;      // identificador de facility do SMPL
+  int *state;  // vetor de estados de cada processo
+  bool tested; // se o processo testou na rodada atual
 } ProcessType;
 
 // Vetor de processos da simulacao
@@ -58,6 +59,12 @@ Array event_array;
 int sim_round = 0;
 
 /**
+ * Verifica se todos os processos sem falha testaram na rodada atual
+ * @param N numero total de processos
+ */
+void count_round(int);
+
+/**
  * Adia evento para a proxima rodada
  * @param type tipo do evento: 0 = recuperacao, 1 = falha
  * @param token index do processo em que o evento estava agendado
@@ -84,8 +91,9 @@ void check_state(int, int, int);
  * @param N numero total de processos
  * @param token index do processo testador
  * @param token2 index do processo testado
+ * @param state valor do estado da descoberta
  */
-void count_event_discovery(int, int, int);
+void count_event_discovery(int, int, int, int);
 
 /**
  * Contabiliza teste do evento por um processo

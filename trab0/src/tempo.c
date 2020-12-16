@@ -1,6 +1,6 @@
 /*
   Autor: Giovanni Rosa
-  Ultima modificao: 03/12/2020
+  Ultima modificao: 15/12/2020
 
 Nosso primeiro programa de simulacao de Sistemas Distribuidos
 Vamos simular N nodos, cada um conta o "tempo" independentemente
@@ -99,6 +99,8 @@ int main(int argc, char *argv[]) {
       break;
     }
   }
+
+  free(process);
 
   puts("==========================================");
   puts("Programa finalizado com sucesso");

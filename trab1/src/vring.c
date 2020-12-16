@@ -56,11 +56,7 @@ int main(int argc, char *argv[]) {
   // loop principal do simulador
   while (time() < MAX_TIME) {
     cause(&e, &token);
-    if (token == 0) {
-      ++sim_round;
-      puts("\n******************************************");
-      printf("Iniciando round de testes %d\n", sim_round);
-    }
+    count_round(N);
     if (token > N - 1) {
       printf("Um evento foi agendado para o processo %d, mas o maximo de "
              "processos e de %d!\n",
@@ -85,13 +81,17 @@ int main(int argc, char *argv[]) {
         t_result = t % 2 == 0 ? "correto" : "falho";
         printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
                token2, time(), t_result);
-        if (t == 0 && process[token].state[token2] % 2 != 0 ||
-            t == 1 && process[token].state[token2] % 2 != 1) {
-          ++process[token].state[token2];
+        if ((t == 0 && process[token].state[token2] % 2 != 0) ||
+            (t == 1 && process[token].state[token2] % 2 != 1)) {
+          if (process[token].state[token2] == -1) {
+            process[token].state[token2] = t;
+          } else {
+            ++process[token].state[token2];
+          }
           printf("State[%d] atualizado para %d\n", token2,
                  process[token].state[token2]);
           count_event_test(N, token, token2);
-          count_event_discovery(N, token, token2);
+          count_event_discovery(N, token, token2, process[token].state[token2]);
         }
         if (t % 2 == 0) { // se par esta sem falha, verifica novidades
           check_state(N, token, token2);
@@ -99,6 +99,7 @@ int main(int argc, char *argv[]) {
       } while (t != 0);
       schedule(TEST, 30.0, token);
       print_state(N, token);
+      process[token].tested = true;
       printf("==========================================\n");
       break;
     case FAULT:
@@ -141,11 +142,30 @@ int main(int argc, char *argv[]) {
 
   print_event_array();
   free_array(event_array);
+  free(process);
 
   puts("\n==========================================");
   puts("Programa finalizado com sucesso");
   puts("Autor: Giovanni Rosa :)");
   puts("==========================================");
+}
+
+void count_round(int N) {
+  bool all_tested = true;
+  for (int i = 0; i < N; ++i) {
+    if (process[i].state[i] % 2 == 0 && !process[i].tested) {
+      all_tested = false;
+      break;
+    }
+  }
+  if (all_tested) {
+    ++sim_round;
+    puts("\n******************************************");
+    printf("Iniciando round de testes %d\n", sim_round);
+    for (int i = 0; i < N; ++i) {
+      process[i].tested = false;
+    }
+  }
 }
 
 void delay_event(int type, int token) {
@@ -176,7 +196,7 @@ void check_state(int N, int token, int token2) {
       printf("Novidade encontrada, transferindo state[%d]...\n", i);
       printf("State[%d] atualizado para %d\n", i, process[token2].state[i]);
       process[token].state[i] = process[token2].state[i];
-      count_event_discovery(N, token, i);
+      count_event_discovery(N, token, i, process[token2].state[i]);
     }
   }
   if (!transfered) {
@@ -184,8 +204,9 @@ void check_state(int N, int token, int token2) {
   }
 }
 
-void count_event_discovery(int N, int token, int token2) {
-  if (event != NULL && event->latency == 0 && event->proc == token2) {
+void count_event_discovery(int N, int token, int token2, int state) {
+  if (event != NULL && event->latency == -1 && event->proc == token2 &&
+      process[token2].state[token2] == state) {
     printf("Event[%d] descoberto pelo processo %d\n", event->id, token);
     // checa se todos os processos sem falha descobriram o evento
     bool diag = true;
@@ -205,7 +226,7 @@ void count_event_discovery(int N, int token, int token2) {
 }
 
 void count_event_test(int N, int token, int token2) {
-  if (event != NULL && event->latency == 0 && event->proc == token2) {
+  if (event != NULL && event->latency == -1 && event->proc == token2) {
     printf("Event[%d] testado pelo processo %d\n", event->id, token);
     ++event->n_tests;
   }
@@ -234,7 +255,7 @@ void create_event(int N, int type, int token) {
   event->type = type;
   event->n_tests = 0;
   event->diag = false;
-  event->latency = 0;
+  event->latency = -1;
   insert_array(event_array, event);
 
   // se falha, reseta o vetor de estados pois é falha crash
@@ -279,6 +300,7 @@ void init_process(int N) {
     for (int j = 0; j < N; ++j) {
       process[i].state[j] = i == j ? 0 : -1;
     }
+    process[i].tested = true;
   }
 }
 
@@ -286,8 +308,8 @@ void schedule_events(int N) {
   for (int i = 0; i < N; ++i) {
     schedule(TEST, 30.0, i);
   }
-  schedule(FAULT, 31.0, 1);
-  schedule(RECOVERY, 61.0, 1);
-  // schedule(FAULT, 119.0, 3);
-  // schedule(RECOVERY, 189.0, 3);
+  schedule(FAULT, 35.0, 0);
+  schedule(FAULT, 129.0, 3);
+  schedule(RECOVERY, 196.0, 3);
+  schedule(RECOVERY, 263.0, 0);
 }
