@@ -10,9 +10,8 @@ Declaracao do programa VRing
 
 #include "../../lib/array.h"
 #include "../../lib/smpl.h"
+#include "../../lib/cisj.h"
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 // Evento de teste
 #define TEST 1
@@ -57,5 +56,83 @@ Array event_array;
 
 // Rodada atual da simulacao
 int sim_round = 0;
+
+/**
+ * Verifica se todos os processos sem falha testaram na rodada atual
+ * @param N numero total de processos
+ */
+void count_round(int);
+
+/**
+ * Adia evento para a proxima rodada
+ * @param type tipo do evento: 0 = recuperacao, 1 = falha
+ * @param token index do processo em que o evento estava agendado
+ */
+void delay_event(int, int);
+
+/**
+ * Imprime o vetor de estados de um processo especifico
+ * @param token index do processo
+ * @param N numero total de processos
+ */
+void print_state(int, int);
+
+/**
+ * Verifica novidades do vetor de estados de um processo em relacao ao outro
+ * @param N numero total de processos
+ * @param token index do processo testador
+ * @param token2 index do processo testado
+ */
+void check_state(int, int, int);
+
+/**
+ * Contabiliza descoberta do evento por um processo
+ * @param N numero total de processos
+ * @param token index do processo testador
+ * @param token2 index do processo testado
+ * @param state valor do estado da descoberta
+ */
+void count_event_discovery(int, int, int, int);
+
+/**
+ * Contabiliza teste do evento por um processo
+ * @param N numero total de processos
+ * @param token index do processo testador
+ * @param token2 index do processo testado
+ */
+void count_event_test(int, int, int);
+
+/**
+ * Imprime vetor com todos os eventos da simulacao
+ */
+void print_event_array();
+
+/**
+ * Cria um evento
+ * @param N numero total de processos
+ * @param type tipo do evento: 0 = recuperacao, 1 = falha
+ * @param token index do processo em que o evento ocorreu
+ */
+void create_event(int, int, int);
+
+/**
+ * Processa as entradas do usuario
+ * @param N numero total de processos
+ * @param argc quantidade de argumentos
+ * @param argc vetor de argumentos
+ */
+void user_input(int *, int, char *[]);
+
+/**
+ * Inicializa processos na memoria
+ * @param N numero total de processos
+ */
+void init_process(int);
+
+/**
+ * Agenda os eventos que ocorrerao durante a simulacao
+ * @param N numero total de processos
+ */
+void schedule_events(int);
 
 #endif
