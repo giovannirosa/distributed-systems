@@ -22,6 +22,10 @@ typedef struct node_set {
   ssize_t offset;
 } node_set;
 
+/**
+ * Libera memoria dos nodos
+ * @param nodes lista
+ */
 void set_free(node_set *nodes);
 
 /**

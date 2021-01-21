@@ -21,7 +21,7 @@ Declaracao do programa VRing
 #define RECOVERY 3
 
 // Tempo maximo de simulacao
-#define MAX_TIME 250
+#define MAX_TIME 70
 
 // Descritor do processo
 typedef struct {
@@ -57,11 +57,15 @@ Array event_array;
 // Rodada atual da simulacao
 int sim_round = 0;
 
+// Cluster a ser testado
+int cluster = 0;
+
 /**
  * Verifica se todos os processos sem falha testaram na rodada atual
  * @param N numero total de processos
+ * @param logN log na base 2 do numero total de processos
  */
-void count_round(int);
+void count_round(int, int);
 
 /**
  * Adia evento para a proxima rodada

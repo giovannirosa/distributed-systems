@@ -37,7 +37,7 @@ correspondente no vetor STATE[].
 int main(int argc, char *argv[]) {
   static int N,              // numero de processos
       token,                 // processo que esta executando
-      e, r, i, j, t, token2, s; // variaveis auxiliares
+      e, r, i, j, t, token2; // variaveis auxiliares
 
   const char *t_result;
 
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
   // loop principal do simulador
   while (time() < MAX_TIME) {
     cause(&e, &token);
-    count_round(N);
+    count_round(N, logN);
     if (token > N - 1) {
       printf("Um evento foi agendado para o processo %d, mas o maximo de "
              "processos e de %d!\n",
@@ -83,39 +83,38 @@ int main(int argc, char *argv[]) {
       printf("\n==========================================\n");
       printf("Iniciando testes do processo %d\n", token);
       print_state(N, token);
-      s = 1;
+      nodes = cis(token, cluster);
+      for (i = 0; i < nodes->size; i++)
+        printf("%i ", nodes->nodes[i]);
+      puts("");
+      j = 0;
       do {
-        nodes = cis(token, s);
-        for (i = 0; i < nodes->size; i++)
-          printf("%i ", nodes->nodes[i]);
-        puts("");
-        // do {
-        //   if (token2 == token) {
-        //     printf("Todos os demais processos estao falhos!\n");
-        //     break;
-        //   }
-        //   t = status(process[token2].id);
-        //   t_result = t % 2 == 0 ? "correto" : "falho";
-        //   printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
-        //         token2, time(), t_result);
-        //   if ((t == 0 && process[token].state[token2] % 2 != 0) ||
-        //       (t == 1 && process[token].state[token2] % 2 != 1)) {
-        //     if (process[token].state[token2] == -1) {
-        //       process[token].state[token2] = t;
-        //     } else {
-        //       ++process[token].state[token2];
-        //     }
-        //     printf("State[%d] atualizado para %d\n", token2,
-        //           process[token].state[token2]);
-        //     count_event_test(N, token, token2);
-        //     count_event_discovery(N, token, token2, process[token].state[token2]);
-        //   }
-        //   if (t % 2 == 0) { // se par esta sem falha, verifica novidades
-        //     check_state(N, token, token2);
-        //   }
-        // } while (t != 0);
-        set_free(nodes);
-      } while (s++ < logN);
+        // if (token2 == token) {
+        //   printf("Todos os demais processos estao falhos!\n");
+        //   break;
+        // }
+        token2 = nodes->nodes[j];
+        t = status(process[token2].id);
+        t_result = t % 2 == 0 ? "correto" : "falho";
+        printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
+              token2, time(), t_result);
+        if ((t == 0 && process[token].state[token2] % 2 != 0) ||
+            (t == 1 && process[token].state[token2] % 2 != 1)) {
+          if (process[token].state[token2] == -1) {
+            process[token].state[token2] = t;
+          } else {
+            ++process[token].state[token2];
+          }
+          printf("State[%d] atualizado para %d\n", token2,
+                process[token].state[token2]);
+          count_event_test(N, token, token2);
+          count_event_discovery(N, token, token2, process[token].state[token2]);
+        }
+        // if (t % 2 == 0) { // se par esta sem falha, verifica novidades
+        //   check_state(N, token, token2);
+        // }
+      } while (t != 0 && ++j < nodes->size);
+      set_free(nodes);
       schedule(TEST, 30.0, token);
       print_state(N, token);
       process[token].tested = true;
@@ -169,7 +168,7 @@ int main(int argc, char *argv[]) {
   puts("==========================================");
 }
 
-void count_round(int N) {
+void count_round(int N, int logN) {
   bool all_tested = true;
   for (int i = 0; i < N; ++i) {
     if (process[i].state[i] % 2 == 0 && !process[i].tested) {
@@ -179,6 +178,11 @@ void count_round(int N) {
   }
   if (all_tested) {
     ++sim_round;
+    if (cluster == logN) {
+      cluster = 1;
+    } else {
+      ++cluster;
+    }
     puts("\n******************************************");
     printf("Iniciando round de testes %d\n", sim_round);
     for (int i = 0; i < N; ++i) {
@@ -328,7 +332,7 @@ void schedule_events(int N) {
     schedule(TEST, 30.0, i);
   }
   schedule(FAULT, 35.0, 0);
-  schedule(FAULT, 99.0, 2);
-  schedule(RECOVERY, 167.0, 0);
-  schedule(RECOVERY, 210.0, 2);
+  // schedule(FAULT, 77.0, 1);
+  schedule(RECOVERY, 100.0, 0);
+  // schedule(RECOVERY, 120.0, 1);
 }
