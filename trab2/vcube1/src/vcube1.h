@@ -8,9 +8,9 @@ Declaracao do programa VRing
 #ifndef VRING_H
 #define VRING_H
 
-#include "../../lib/array.h"
-#include "../../lib/cisj.h"
-#include "../../lib/smpl.h"
+#include "../../../lib/array.h"
+#include "../../../lib/cisj.h"
+#include "../../../lib/smpl.h"
 #include <stdbool.h>
 
 // Evento de teste
