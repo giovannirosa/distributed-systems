@@ -5,29 +5,29 @@
 Programa dedicado a implementacao do VCube (versao 1) como requisito para o
 Trabalho Pratico 2 da disciplina de Sistemas Distribuidos.
 
-Trabalho Pratico 2: Implemente as duas versões do VCube usando SMPL. Lembre-se:
-na versão 1, em cada intervalo de testes, cada processo correto executa testes
-em 1 cluster sequencialmente até encontrar um processo correto, ou testar todos
-os processos falhos. Tendo testado um processo correto, obtém informações sobre
-os processos restantes do cluster (aqueles que não testou) a partir do processo
-correto testado. Na versão 2, são definidos de antemão com o uso da função
-C(i,s) executada por e para todos os processos quem são os testadores de quais
-processos. Esta estratégia garante NlogN testes a cada logN rodadas de testes.
-Na versão 2, ao testar um processo correto, o testador obtém informações sobre
-qualquer “novidade” que o processo testado tenha. Sugestão para implementar na
-simulação (em um sistema real não seria boa ideia): simplesmente compare os
+Trabalho Pratico 2: Implemente as duas versoes do VCube usando SMPL. Lembre-se:
+na versao 1, em cada intervalo de testes, cada processo correto executa testes
+em 1 cluster sequencialmente ate encontrar um processo correto, ou testar todos
+os processos falhos. Tendo testado um processo correto, obtem informacoes sobre
+os processos restantes do cluster (aqueles que nao testou) a partir do processo
+correto testado. Na versao 2, sao definidos de antemao com o uso da funcao
+C(i,s) executada por e para todos os processos quem sao os testadores de quais
+processos. Esta estrategia garante NlogN testes a cada logN rodadas de testes.
+Na versao 2, ao testar um processo correto, o testador obtem informacoes sobre
+qualquer "novidade" que o processo testado tenha. Sugestao para implementar na
+simulacao (em um sistema real nao seria boa ideia): simplesmente compare os
 vetores State do testador com o testado procurando entradas com maior valor.
 
-Vamos manter a mesma definição de rodada para as duas versões: todos os
+Vamos manter a mesma definicao de rodada para as duas versoes: todos os
 processos corretos executaram testes em 1 de seus clusters.
 
 Mostre resultados para diversos valores de N e diversos eventos - um evento em
-um processo de cada vez, um evento só ocorre depois do evento anterior ser
-diagnosticado. Para cada evento mostre claramente o número de testes executados
-e a latência para completar o diagnóstico do evento. Cada nodo mantém o vetor
-STATE[0..N-1] de contadores de eventos, inicializado em -1 (estado “unknown”).
-Assume-se que os processos são inicializados sem-falha, a entrada correspondente
-ao próprio processo no vetor STATE[] do testador é setada para zero. Ao
+um processo de cada vez, um evento so ocorre depois do evento anterior ser
+diagnosticado. Para cada evento mostre claramente o numero de testes executados
+e a latencia para completar o diagnostico do evento. Cada nodo mantem o vetor
+STATE[0..N-1] de contadores de eventos, inicializado em -1 (estado "unknown").
+Assume-se que os processos sao inicializados sem-falha, a entrada correspondente
+ao proprio processo no vetor STATE[] do testador e setada para zero. Ao
 descobrir um novo evento em um processo testado, o testador incrementa a entrada
 correspondente no vetor STATE[].
 */
@@ -63,7 +63,6 @@ int main(int argc, char *argv[]) {
   schedule_events(N);
 
   int logN = log2(N);
-  printf("logN = %d", logN);
 
   // loop principal do simulador
   while (time() < MAX_TIME) {
@@ -223,10 +222,6 @@ void check_state(int N, int token, int token2, int nodes[], int cluster,
   print_state(N, token2);
   bool transfered = false;
   for (int i = j + 1; i < POW_2(cluster - 1); ++i) {
-    printf("node[%d] = %d\n", i, nodes[i]);
-    printf("token2 = %d | token = %d\n", process[token2].state[nodes[i]],
-           process[token].state[nodes[i]]);
-
     if (process[token2].state[nodes[i]] > process[token].state[nodes[i]]) {
       transfered = true;
       printf("Novidade encontrada, transferindo state[%d]...\n", nodes[i]);
@@ -350,6 +345,6 @@ void schedule_events(int N) {
   }
   schedule(FAULT, 35.0, 0);
   // schedule(FAULT, 77.0, 1);
-  schedule(RECOVERY, 100.0, 0);
+  schedule(RECOVERY, 130.0, 0);
   // schedule(RECOVERY, 120.0, 1);
 }
