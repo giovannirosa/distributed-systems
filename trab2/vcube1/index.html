@@ -12,6 +12,101 @@ title: VCube Versão 1
     <p>O código foi escrito a partir do código do <a href="../../trab1/src/vring.c">vring.c</a> do <a
             href="../../trab1/">Trabalho Prático 1</a>. As seguintes alterações foram realizadas para cumprir os
         requisitos do Trabalho Prático 2:</p>
+    <ol>
+        <li>Adição da propriedade do cluster a ser testado por cada processo na rodada corrente:</li>
+{% highlight c %}
+// Descritor do processo
+typedef struct {
+  int id;      // identificador de facility do SMPL
+  int *state;  // vetor de estados de cada processo
+  bool tested; // se o processo testou na rodada atual
+  int cluster; // cluster a ser testado
+} ProcessType;
+{% endhighlight %}
+            <li>Inclusão de uma biblioteca da função Cis (<a href="../../lib/cisj.c">cisj.c</a>,<a
+                href="../../lib/cisj.h">cisj.h</a>) fornecida pelo professor para calcular o cluster <i>s</i> do processo
+            <i>i</i>.</li>
+            <li>Funções auxiliares para a simulação que estão descritas no <a href="./src/vring.h">vring.h</a></li>
+            <li>O caso de teste foi modificado para calcular o cluster a ser testado pelo processo, iterando nele até encontrar um
+                processo correto ou testar todos daquele cluster.</li>
+{% highlight c %}
+case TEST:
+    if (status(process[token].id) != 0)
+        break; // se processo falho, nao testa
+    token2 = token;
+    printf("\n==========================================\n");
+    printf("Iniciando testes do processo %d\n", token);
+    print_state(N, token);
+    nodes = cis(token, process[token].cluster);
+    print_cluster(nodes->nodes, token, nodes->size);
+    j = 0;
+    do {
+        token2 = nodes->nodes[j];
+        t = status(process[token2].id);
+        t_result = t % 2 == 0 ? "correto" : "falho";
+        printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
+                token2, time(), t_result);
+        if ((t == 0 && process[token].state[token2] % 2 != 0) ||
+            (t == 1 && process[token].state[token2] % 2 != 1)) {
+            if (process[token].state[token2] == -1) {
+                process[token].state[token2] = t;
+            } else {
+                ++process[token].state[token2];
+            }
+            printf("State[%d] atualizado para %d\n", token2,
+                    process[token].state[token2]);
+            count_event_test(N, token, token2);
+            count_event_discovery(N, token, token2, process[token].state[token2]);
+        }
+        if (t % 2 == 0) { // se par esta sem falha, verifica novidades
+            check_state(N, token, token2, nodes->nodes, process[token].cluster,
+                        j);
+        }
+    } while (t != 0 && ++j < nodes->size);
+    set_free(nodes);
+    schedule(TEST, 30.0, token);
+    print_state(N, token);
+    process[token].tested = true;
+    count_cluster(token, logN);
+    printf("==========================================\n");
+    break;
+{% endhighlight %}
+            <li>Uma função para contar o próximo cluster a ser testado pelo processo:</li>
+{% highlight c %}
+if (process[token].cluster == logN) {
+    process[token].cluster = 1;
+} else {
+    ++process[token].cluster;
+}
+{% endhighlight %}
+            <li>A função para transferência de estados foi adaptada para o VCube (versão 1). Agora só são transferidas novidades do
+                restante dos processos do cluster que não foram testados naquela rodada:</li>
+{% highlight c %}
+for (int i = j + 1; i < POW_2(cluster - 1); ++i) {
+    if (process[token2].state[nodes[i]] > process[token].state[nodes[i]]) {
+        transfered = true;
+        printf("Novidade encontrada, transferindo state[%d]...\n", nodes[i]);
+        printf("State[%d] atualizado para %d\n", nodes[i],
+                process[token2].state[nodes[i]]);
+        process[token].state[nodes[i]] = process[token2].state[nodes[i]];
+        count_event_discovery(N, token, nodes[i],
+                            process[token2].state[nodes[i]]);
+    }
+}
+{% endhighlight %}
+            <li>A informação do cluster a ser testado pelo processo é resetada após um evento de falha:</li>
+{% highlight c %}
+// se falha, reseta o vetor de estados pois é falha crash
+if (type == 1) {
+    for (int i = (token + 1) % N;; i = (i + 1) % N) {
+        if (i == token)
+            break;
+        process[token].state[i] = -1;
+    }
+    process[token].cluster = 1;
+}
+{% endhighlight %}
+        </ol>
     <h2>Execução</h2>
     <p>Os testes a seguir foram executados para demonstrar a corretude do programa. A rodada 0 indica o estado inicial dos
         processos. A partir da rodada 1, os estados representados nas imagens representam àqueles dos finais da respectiva
