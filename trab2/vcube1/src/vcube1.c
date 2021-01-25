@@ -291,7 +291,7 @@ void create_event(int N, int type, int token) {
   event->latency = -1;
   insert_array(event_array, event);
 
-  // se falha, reseta o vetor de estados pois é falha crash
+  // se falha, reseta o vetor de estados e cluster, pois é falha crash
   if (type == 1) {
     for (int i = (token + 1) % N;; i = (i + 1) % N) {
       if (i == token)
@@ -343,8 +343,8 @@ void schedule_events(int N) {
   for (int i = 0; i < N; ++i) {
     schedule(TEST, 30.0, i);
   }
-  schedule(FAULT, 35.0, 0);
-  // schedule(FAULT, 77.0, 1);
-  schedule(RECOVERY, 130.0, 0);
-  // schedule(RECOVERY, 120.0, 1);
+  schedule(FAULT, 35.0, 1);
+  schedule(FAULT, 130.0, 2);
+  schedule(RECOVERY, 197.0, 1);
+  schedule(RECOVERY, 260.0, 2);
 }
