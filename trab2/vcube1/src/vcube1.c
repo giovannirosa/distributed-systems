@@ -343,8 +343,8 @@ void schedule_events(int N) {
   for (int i = 0; i < N; ++i) {
     schedule(TEST, 30.0, i);
   }
-  schedule(FAULT, 35.0, 1);
-  schedule(FAULT, 130.0, 2);
-  schedule(RECOVERY, 197.0, 1);
-  schedule(RECOVERY, 260.0, 2);
+  schedule(FAULT, 35.0, 7);
+  schedule(RECOVERY, 190.0, 7);
+  // schedule(RECOVERY, 197.0, 1);
+  // schedule(RECOVERY, 260.0, 2);
 }
