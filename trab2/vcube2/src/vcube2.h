@@ -58,6 +58,15 @@ Array event_array;
 int sim_round = 0;
 
 /**
+ * Verifica se o processo é testador de outro em determinado cluster
+ * @param j processo potencial testado
+ * @param s index do cluster
+ * @param token processo potencial testador
+ * @param nodes vetor de processos do cluster
+ */
+int verify_tester(int j, int s, int token, int nodes[]);
+
+/**
  * Verifica se todos os processos sem falha testaram na rodada atual
  * @param N numero total de processos
  * @param logN log na base 2 do numero total de processos

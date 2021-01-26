@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 
   const char *t_result;
 
-  node_set *nodes, *nodes_j;
+  node_set *nodes;
 
   // inicializacao da lista de eventos
   event_array = init_array();
@@ -81,24 +81,16 @@ int main(int argc, char *argv[]) {
       printf("\n==========================================\n");
       printf("Iniciando testes do processo %d\n", token);
       print_state(N, token);
+      // testa todos os clusters a cada rodada
       for (int s = 1; s <= logN; ++s) {
         nodes = cis(token, s);
         print_cluster(nodes->nodes, s, nodes->size);
-        for (int j = 0; j < nodes->size; ++j) {//1:[0,(3,2)] / 2:[3,0] / 3:[2,1]
-          token2 = -1;
+        for (int j = 0; j < nodes->size; ++j) {
           if (nodes->nodes[j] >= N) {
             continue;
           }
-          nodes_j = cis(nodes->nodes[j], s);
-          for (int k = 0; k < nodes_j->size; ++k) {
-            if (process[token].state[nodes_j->nodes[k]] % 2 == 0) {
-              if (nodes_j->nodes[k] == token) {
-                token2 = nodes->nodes[j];
-              }
-              break;
-            }
-          }
-          set_free(nodes_j);
+          // verifica se é testador para cada processo do cluster
+          token2 = verify_tester(j, s, token, nodes->nodes);
           if (token2 != -1) {
             t = status(process[token2].id);
             t_result = t % 2 == 0 ? "correto" : "falho";
@@ -175,6 +167,21 @@ int main(int argc, char *argv[]) {
   puts("Programa finalizado com sucesso");
   puts("Autor: Giovanni Rosa :)");
   puts("==========================================");
+}
+
+int verify_tester(int j, int s, int token, int nodes[]) {
+  int to_test = -1;
+  node_set *nodes_j = cis(j, s);
+  for (int k = 0; k < nodes_j->size; ++k) {
+    if (process[token].state[nodes_j->nodes[k]] % 2 == 0) {
+      if (nodes_j->nodes[k] == token) {
+        to_test = nodes[j];
+      }
+      break;
+    }
+  }
+  set_free(nodes_j);
+  return to_test;
 }
 
 void count_round(int N, int logN) {
