@@ -113,22 +113,22 @@ if (nodes->nodes[j] >= N) {
         Estes testes foram realizados para verificar as validações do programa para evitar entradas incorretas do usuário:
         <ol>
             <li>./vcube2</li>
-    {% highlight plaintext %}
-    Uso correto: vcube2 <numero de processos>
-    {% endhighlight %}
+{% highlight plaintext %}
+Uso correto: vcube2 <numero de processos>
+{% endhighlight %}
             <li>./vcube2 1</li>
-    {% highlight plaintext %}
-    O numero minimo de processos e 2!
-    {% endhighlight %}
+{% highlight plaintext %}
+O numero minimo de processos e 2!
+{% endhighlight %}
             <li>./vcube2 2 - com um evento agendado para um processo maior que 1</li>
-    {% highlight plaintext %}
-    Este programa foi executado para N=2 processos
-    O tempo maximo de simulacao e de 350
-    
-    ******************************************
-    Iniciando round de testes 1
-    Um evento foi agendado para o processo 5, mas o maximo de processos e de 2!
-    {% endhighlight %}
+{% highlight plaintext %}
+Este programa foi executado para N=2 processos
+O tempo maximo de simulacao e de 350
+
+******************************************
+Iniciando round de testes 1
+Um evento foi agendado para o processo 5, mas o maximo de processos e de 2!
+{% endhighlight %}
         </ol>
         <h3>Teste 1</h3>
         <p>Este teste foi executado para 4 processos, com o tempo máximo de simulação de 180. Os eventos agendados foram:</p>
@@ -138,9 +138,9 @@ if (nodes->nodes[j] >= N) {
         </ol>
         <p>Em comparação com o mesmo teste na versão 1 do VCube:</p>
             <ul>
-                <li>o primeiro evento teve o mesmo número de testes e a latência
+                <li>o primeiro evento obteve o mesmo número de testes e a latência
                     reduzida para 1 (era 2);</li>
-                <li>o segundo evento teve as mesmas estatísticas da versão anterior.</li>
+                <li>o segundo evento obteve as mesmas estatísticas da versão anterior.</li>
             </ul>
         <p>O estado de cada processo durante as rodadas pode ser visualizado na imagem abaixo:</p>
         <img src="./img/teste1.png" alt="teste 1">
@@ -405,6 +405,376 @@ Simulacao encerrada
 Eventos durante a simulacao:
 Event[1]: FALHA | round 2 | tempo 035.0 | processo 0 | numero de testes de 2 | latencia de 1
 Event[2]: RECUP | round 4 | tempo 120.0 | processo 0 | numero de testes de 2 | latencia de 1
+
+==========================================
+Programa finalizado com sucesso
+Autor: Giovanni Rosa :)
+==========================================
+{% endhighlight %}
+        </details>
+        <h3>Teste 2</h3>
+        <p>Este teste foi executado para 4 processos, com o tempo máximo de simulação de 250. Os eventos agendados foram:</p>
+        <ol>
+            <li>Falha do processo 1 no tempo 35 [# testes 2, latência 1]</li>
+            <li>Falha do processo 2 no tempo 120 [# testes 2, latência 1]</li>
+            <li>Recuperação do processo 1 no tempo 140 [# testes 2, latência 1]</li>
+            <li>Recuperação do processo 2 no tempo 210 [# testes 1, latência 0]</li>
+        </ol>
+        <p>O estado de cada processo durante as rodadas pode ser visualizado na imagem abaixo:</p>
+        <img src="./img/teste2.png" alt="teste 2">
+        <p>O log deste teste pode ser visualizado abaixo:</p>
+        <details>
+            <summary style="cursor: pointer;">Log do teste 2 (clique para expandir)</summary>
+{% highlight plaintext %}
+Este programa foi executado para N=4 processos
+O tempo maximo de simulacao e de 270
+
+******************************************
+Iniciando round de testes 1
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[-1] 2[-1] 3[-1] 
+Verificando cluster 1: [1]
+Processo 0 testou processo 1 no tempo 30.0: correto
+State[1] atualizado para 0
+Atualizando state do processo 0 com o state do processo 1
+State do processo 1: 0[-1] 1[0] 2[-1] 3[-1] 
+Nenhuma transferencia realizada
+State do processo 0: 0[0] 1[0] 2[-1] 3[-1] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+State do processo 1: 0[-1] 1[0] 2[-1] 3[-1] 
+Verificando cluster 1: [0]
+Processo 1 testou processo 0 no tempo 30.0: correto
+State[0] atualizado para 0
+Atualizando state do processo 1 com o state do processo 0
+State do processo 0: 0[0] 1[0] 2[-1] 3[-1] 
+Nenhuma transferencia realizada
+State do processo 1: 0[0] 1[0] 2[-1] 3[-1] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+State do processo 2: 0[-1] 1[-1] 2[0] 3[-1] 
+Verificando cluster 1: [3]
+Processo 2 testou processo 3 no tempo 30.0: correto
+State[3] atualizado para 0
+Atualizando state do processo 2 com o state do processo 3
+State do processo 3: 0[-1] 1[-1] 2[-1] 3[0] 
+Nenhuma transferencia realizada
+State do processo 2: 0[-1] 1[-1] 2[0] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 3
+State do processo 3: 0[-1] 1[-1] 2[-1] 3[0] 
+Verificando cluster 1: [2]
+Processo 3 testou processo 2 no tempo 30.0: correto
+State[2] atualizado para 0
+Atualizando state do processo 3 com o state do processo 2
+State do processo 2: 0[-1] 1[-1] 2[0] 3[0] 
+Nenhuma transferencia realizada
+State do processo 3: 0[-1] 1[-1] 2[0] 3[0] 
+==========================================
+
+******************************************
+Iniciando round de testes 2
+
+--> Event[1]: Processo 1 falhou no tempo 35.0
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[0] 2[-1] 3[-1] 
+Verificando cluster 2: [2, 3]
+Processo 0 testou processo 2 no tempo 60.0: correto
+State[2] atualizado para 0
+Atualizando state do processo 0 com o state do processo 2
+State do processo 2: 0[-1] 1[-1] 2[0] 3[0] 
+Novidade encontrada, transferindo state[3]...
+State[3] atualizado para 0
+State do processo 0: 0[0] 1[0] 2[0] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+State do processo 2: 0[-1] 1[-1] 2[0] 3[0] 
+Verificando cluster 2: [0, 1]
+Processo 2 testou processo 0 no tempo 60.0: correto
+State[0] atualizado para 0
+Atualizando state do processo 2 com o state do processo 0
+State do processo 0: 0[0] 1[0] 2[0] 3[0] 
+Novidade encontrada, transferindo state[1]...
+State[1] atualizado para 0
+State do processo 2: 0[0] 1[0] 2[0] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 3
+State do processo 3: 0[-1] 1[-1] 2[0] 3[0] 
+Verificando cluster 2: [1, 0]
+Processo 3 testou processo 1 no tempo 60.0: falho
+State[1] atualizado para 1
+Event[1] testado pelo processo 3
+Event[1] descoberto pelo processo 3
+State do processo 3: 0[-1] 1[1] 2[0] 3[0] 
+==========================================
+
+******************************************
+Iniciando round de testes 3
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[0] 2[0] 3[0] 
+Verificando cluster 1: [1]
+Processo 0 testou processo 1 no tempo 90.0: falho
+State[1] atualizado para 1
+Event[1] testado pelo processo 0
+Event[1] descoberto pelo processo 0
+State do processo 0: 0[0] 1[1] 2[0] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+State do processo 2: 0[0] 1[0] 2[0] 3[0] 
+Verificando cluster 1: [3]
+Processo 2 testou processo 3 no tempo 90.0: correto
+Atualizando state do processo 2 com o state do processo 3
+State do processo 3: 0[-1] 1[1] 2[0] 3[0] 
+Novidade encontrada, transferindo state[1]...
+State[1] atualizado para 1
+Event[1] descoberto pelo processo 2
+--> Diagnostico do evento 1 completo
+State do processo 2: 0[0] 1[1] 2[0] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 3
+State do processo 3: 0[-1] 1[1] 2[0] 3[0] 
+Verificando cluster 1: [2]
+Processo 3 testou processo 2 no tempo 90.0: correto
+Atualizando state do processo 3 com o state do processo 2
+State do processo 2: 0[0] 1[1] 2[0] 3[0] 
+Novidade encontrada, transferindo state[0]...
+State[0] atualizado para 0
+State do processo 3: 0[0] 1[1] 2[0] 3[0] 
+==========================================
+
+******************************************
+Iniciando round de testes 4
+
+--> Event[2]: Processo 2 falhou no tempo 120.0
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[1] 2[0] 3[0] 
+Verificando cluster 2: [2, 3]
+Processo 0 testou processo 2 no tempo 120.0: falho
+State[2] atualizado para 1
+Event[2] testado pelo processo 0
+Event[2] descoberto pelo processo 0
+Processo 0 testou processo 3 no tempo 120.0: correto
+Atualizando state do processo 0 com o state do processo 3
+State do processo 3: 0[0] 1[1] 2[0] 3[0] 
+Nenhuma transferencia realizada
+State do processo 0: 0[0] 1[1] 2[1] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 3
+State do processo 3: 0[0] 1[1] 2[0] 3[0] 
+Verificando cluster 2: [1, 0]
+Processo 3 testou processo 1 no tempo 120.0: falho
+State do processo 3: 0[0] 1[1] 2[0] 3[0] 
+==========================================
+
+******************************************
+Iniciando round de testes 5
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[1] 2[1] 3[0] 
+Verificando cluster 1: [1]
+Processo 0 testou processo 1 no tempo 150.0: falho
+State do processo 0: 0[0] 1[1] 2[1] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 3
+State do processo 3: 0[0] 1[1] 2[0] 3[0] 
+Verificando cluster 1: [2]
+Processo 3 testou processo 2 no tempo 150.0: falho
+State[2] atualizado para 1
+Event[2] testado pelo processo 3
+Event[2] descoberto pelo processo 3
+--> Diagnostico do evento 2 completo
+State do processo 3: 0[0] 1[1] 2[1] 3[0] 
+==========================================
+
+******************************************
+Iniciando round de testes 6
+
+--> Event[3]: Processo 1 recuperou no tempo 170.0
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[1] 2[1] 3[0] 
+Verificando cluster 2: [2, 3]
+Processo 0 testou processo 2 no tempo 180.0: falho
+Processo 0 testou processo 3 no tempo 180.0: correto
+Atualizando state do processo 0 com o state do processo 3
+State do processo 3: 0[0] 1[1] 2[1] 3[0] 
+Nenhuma transferencia realizada
+State do processo 0: 0[0] 1[1] 2[1] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 3
+State do processo 3: 0[0] 1[1] 2[1] 3[0] 
+Verificando cluster 2: [1, 0]
+Processo 3 testou processo 1 no tempo 180.0: correto
+State[1] atualizado para 2
+Event[3] testado pelo processo 3
+Event[3] descoberto pelo processo 3
+Atualizando state do processo 3 com o state do processo 1
+State do processo 1: 0[-1] 1[2] 2[-1] 3[-1] 
+Nenhuma transferencia realizada
+Processo 3 testou processo 0 no tempo 180.0: correto
+Atualizando state do processo 3 com o state do processo 0
+State do processo 0: 0[0] 1[1] 2[1] 3[0] 
+Nenhuma transferencia realizada
+State do processo 3: 0[0] 1[2] 2[1] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+State do processo 1: 0[-1] 1[2] 2[-1] 3[-1] 
+Verificando cluster 1: [0]
+Processo 1 testou processo 0 no tempo 200.0: correto
+State[0] atualizado para 0
+Atualizando state do processo 1 com o state do processo 0
+State do processo 0: 0[0] 1[1] 2[1] 3[0] 
+Novidade encontrada, transferindo state[2]...
+State[2] atualizado para 1
+Novidade encontrada, transferindo state[3]...
+State[3] atualizado para 0
+State do processo 1: 0[0] 1[2] 2[1] 3[0] 
+==========================================
+
+******************************************
+Iniciando round de testes 7
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[1] 2[1] 3[0] 
+Verificando cluster 1: [1]
+Processo 0 testou processo 1 no tempo 210.0: correto
+State[1] atualizado para 2
+Event[3] testado pelo processo 0
+Event[3] descoberto pelo processo 0
+--> Diagnostico do evento 3 completo
+Atualizando state do processo 0 com o state do processo 1
+State do processo 1: 0[0] 1[2] 2[1] 3[0] 
+Nenhuma transferencia realizada
+State do processo 0: 0[0] 1[2] 2[1] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 3
+State do processo 3: 0[0] 1[2] 2[1] 3[0] 
+Verificando cluster 1: [2]
+Processo 3 testou processo 2 no tempo 210.0: falho
+State do processo 3: 0[0] 1[2] 2[1] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+State do processo 1: 0[0] 1[2] 2[1] 3[0] 
+Verificando cluster 2: [3, 2]
+Processo 1 testou processo 3 no tempo 230.0: correto
+Atualizando state do processo 1 com o state do processo 3
+State do processo 3: 0[0] 1[2] 2[1] 3[0] 
+Nenhuma transferencia realizada
+State do processo 1: 0[0] 1[2] 2[1] 3[0] 
+==========================================
+
+******************************************
+Iniciando round de testes 8
+
+--> Event[4]: Processo 2 recuperou no tempo 240.0
+
+==========================================
+Iniciando testes do processo 0
+State do processo 0: 0[0] 1[2] 2[1] 3[0] 
+Verificando cluster 2: [2, 3]
+Processo 0 testou processo 2 no tempo 240.0: correto
+State[2] atualizado para 2
+Event[4] testado pelo processo 0
+Event[4] descoberto pelo processo 0
+Atualizando state do processo 0 com o state do processo 2
+State do processo 2: 0[-1] 1[-1] 2[2] 3[-1] 
+Nenhuma transferencia realizada
+State do processo 0: 0[0] 1[2] 2[2] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 3
+State do processo 3: 0[0] 1[2] 2[1] 3[0] 
+Verificando cluster 2: [1, 0]
+Processo 3 testou processo 1 no tempo 240.0: correto
+Atualizando state do processo 3 com o state do processo 1
+State do processo 1: 0[0] 1[2] 2[1] 3[0] 
+Nenhuma transferencia realizada
+Processo 3 testou processo 0 no tempo 240.0: correto
+Atualizando state do processo 3 com o state do processo 0
+State do processo 0: 0[0] 1[2] 2[2] 3[0] 
+Novidade encontrada, transferindo state[2]...
+State[2] atualizado para 2
+Event[4] descoberto pelo processo 3
+State do processo 3: 0[0] 1[2] 2[2] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 1
+State do processo 1: 0[0] 1[2] 2[1] 3[0] 
+Verificando cluster 1: [0]
+Processo 1 testou processo 0 no tempo 260.0: correto
+Atualizando state do processo 1 com o state do processo 0
+State do processo 0: 0[0] 1[2] 2[2] 3[0] 
+Novidade encontrada, transferindo state[2]...
+State[2] atualizado para 2
+Event[4] descoberto pelo processo 1
+--> Diagnostico do evento 4 completo
+State do processo 1: 0[0] 1[2] 2[2] 3[0] 
+==========================================
+
+==========================================
+Iniciando testes do processo 2
+State do processo 2: 0[-1] 1[-1] 2[2] 3[-1] 
+Verificando cluster 1: [3]
+Processo 2 testou processo 3 no tempo 270.0: correto
+State[3] atualizado para 0
+Atualizando state do processo 2 com o state do processo 3
+State do processo 3: 0[0] 1[2] 2[2] 3[0] 
+Novidade encontrada, transferindo state[0]...
+State[0] atualizado para 0
+Novidade encontrada, transferindo state[1]...
+State[1] atualizado para 2
+State do processo 2: 0[0] 1[2] 2[2] 3[0] 
+==========================================
+
+******************************************
+Simulacao encerrada
+
+==========================================
+
+Eventos durante a simulacao:
+Event[1]: FALHA | round 2 | tempo 035.0 | processo 1 | numero de testes de 2 | latencia de 1
+Event[2]: FALHA | round 4 | tempo 120.0 | processo 2 | numero de testes de 2 | latencia de 1
+Event[3]: RECUP | round 6 | tempo 170.0 | processo 1 | numero de testes de 2 | latencia de 1
+Event[4]: RECUP | round 8 | tempo 240.0 | processo 2 | numero de testes de 1 | latencia de 0
 
 ==========================================
 Programa finalizado com sucesso

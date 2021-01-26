@@ -21,7 +21,7 @@ Declaracao do programa VCube (versao 2)
 #define RECOVERY 3
 
 // Tempo maximo de simulacao
-#define MAX_TIME 180
+#define MAX_TIME 270
 
 // Descritor do processo
 typedef struct {
