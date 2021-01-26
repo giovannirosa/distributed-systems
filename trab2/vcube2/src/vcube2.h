@@ -28,6 +28,7 @@ typedef struct {
   int id;      // identificador de facility do SMPL
   int *state;  // vetor de estados de cada processo
   bool tested; // se o processo testou na rodada atual
+  int cluster; // cluster a ser testado
 } ProcessType;
 
 // Vetor de processos da simulacao
@@ -64,7 +65,14 @@ int sim_round = 0;
  * @param token processo potencial testador
  * @param nodes vetor de processos do cluster
  */
-int verify_tester(int j, int s, int token, int nodes[]);
+int verify_tester(int j, int s, int token);
+
+/**
+ * Conta o proximo cluster a ser testado por determinado processo
+ * @param token index do processo
+ * @param logN log na base 2 do numero total de processos
+ */
+void count_cluster(int, int);
 
 /**
  * Verifica se todos os processos sem falha testaram na rodada atual
