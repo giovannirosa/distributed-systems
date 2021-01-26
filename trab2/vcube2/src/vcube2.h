@@ -2,7 +2,7 @@
   Autor: Giovanni Rosa
   Ultima modificao: 26/01/2021
 
-Declaracao do programa VCube (versao 1)
+Declaracao do programa VCube (versao 2)
 */
 
 #ifndef VRING_H
@@ -21,14 +21,13 @@ Declaracao do programa VCube (versao 1)
 #define RECOVERY 3
 
 // Tempo maximo de simulacao
-#define MAX_TIME 160
+#define MAX_TIME 120
 
 // Descritor do processo
 typedef struct {
   int id;      // identificador de facility do SMPL
   int *state;  // vetor de estados de cada processo
   bool tested; // se o processo testou na rodada atual
-  int cluster; // cluster a ser testado
 } ProcessType;
 
 // Vetor de processos da simulacao
@@ -59,13 +58,6 @@ Array event_array;
 int sim_round = 0;
 
 /**
- * Conta o proximo cluster a ser testado por determinado processo
- * @param token index do processo
- * @param logN log na base 2 do numero total de processos
- */
-void count_cluster(int, int);
-
-/**
  * Verifica se todos os processos sem falha testaram na rodada atual
  * @param N numero total de processos
  * @param logN log na base 2 do numero total de processos
@@ -82,7 +74,7 @@ void delay_event(int, int);
 /**
  * Imprime os processos do cluster
  * @param nodes vetor de processos do cluster
- * @param token index do processo
+ * @param cluster index do cluster
  * @param size tamanho do vetor de processos do cluster
  */
 void print_cluster(int nodes[], int token, int size);
@@ -100,7 +92,7 @@ void print_state(int, int);
  * @param token index do processo testador
  * @param token2 index do processo testado
  */
-void check_state(int, int, int, int[], int, int);
+void check_state(int, int, int);
 
 /**
  * Contabiliza descoberta do evento por um processo
