@@ -331,7 +331,7 @@ void create_event(int N, int type, int token) {
 
 void user_input(int *N, int argc, char *argv[]) {
   if (argc != 2) {
-    puts("Uso correto: vcube1 <numero de processos>");
+    puts("Uso correto: vcube2 <numero de processos>");
     exit(1);
   }
 

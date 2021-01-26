@@ -13,17 +13,9 @@ title: VCube Versão 2
             href="../vcube1/">Versão 1</a> do <a href="../">Trabalho Prático 2</a>. As seguintes alterações foram realizadas
         para cumprir os requisitos do Trabalho Prático 2:</p>
         <ol>
-            <li>Remoção da propriedade do cluster a ser testado por cada processo e todas as suas referências no restante do código:</li>
-{% highlight c %}
-// Descritor do processo
-typedef struct {
-    int id;      // identificador de facility do SMPL
-    int *state;  // vetor de estados de cada processo
-    bool tested; // se o processo testou na rodada atual
-} ProcessType;
-{% endhighlight %}
-            <li>O caso de teste foi modificado para que cada processo teste todos os clusters a cada rodada e verificar se cada
-                processo do cluster deve ser testado ou não:</li>
+            <li>Funções auxiliares para a simulação que estão descritas no <a href="./src/vcube2.h">vcube2.h</a></li>
+            <li>O caso de teste foi modificado para que cada processo verifique se cada
+                outro do cluster atual deve ser testado ou não:</li>
 {% highlight c %}
 case TEST:
     if (status(process[token].id) != 0)
@@ -31,44 +23,47 @@ case TEST:
     printf("\n==========================================\n");
     printf("Iniciando testes do processo %d\n", token);
     print_state(N, token);
-    // testa todos os clusters a cada rodada
-    for (int s = 1; s <= logN; ++s) {
-        nodes = cis(token, s);
-        print_cluster(nodes->nodes, s, nodes->size);
-        for (int j = 0; j < nodes->size; ++j) {
-            if (nodes->nodes[j] >= N) {
-                continue;
+    nodes = cis(token, process[token].cluster);
+    print_cluster(nodes->nodes, token, nodes->size);
+    bool tested = false;
+    for (int j = 0; j < nodes->size; ++j) {
+        if (nodes->nodes[j] >= N) {
+            continue;
+        }
+        // verifica se é testador para cada processo do cluster
+        token2 = verify_tester(nodes->nodes[j], process[token].cluster, token);
+        if (token2 != -1) {
+            tested = true;
+            t = status(process[token2].id);
+            t_result = t % 2 == 0 ? "correto" : "falho";
+            printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
+                    token2, time(), t_result);
+            if ((t == 0 && process[token].state[token2] % 2 != 0) ||
+                (t == 1 && process[token].state[token2] % 2 != 1)) {
+            if (process[token].state[token2] == -1) {
+                process[token].state[token2] = t;
+            } else {
+                ++process[token].state[token2];
             }
-            // verifica se é testador para cada processo do cluster
-            token2 = verify_tester(j, s, token, nodes->nodes);
-            if (token2 != -1) {
-                t = status(process[token2].id);
-                t_result = t % 2 == 0 ? "correto" : "falho";
-                printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
-                        token2, time(), t_result);
-                if ((t == 0 && process[token].state[token2] % 2 != 0) ||
-                    (t == 1 && process[token].state[token2] % 2 != 1)) {
-                    if (process[token].state[token2] == -1) {
-                        process[token].state[token2] = t;
-                    } else {
-                        ++process[token].state[token2];
-                    }
-                    printf("State[%d] atualizado para %d\n", token2,
-                            process[token].state[token2]);
-                    count_event_test(N, token, token2);
-                    count_event_discovery(N, token, token2,
-                                            process[token].state[token2]);
-                }
-                if (t % 2 == 0) { // se par esta sem falha, verifica novidades
-                    check_state(N, token, token2);
-                }
+            printf("State[%d] atualizado para %d\n", token2,
+                    process[token].state[token2]);
+            count_event_test(N, token, token2);
+            count_event_discovery(N, token, token2,
+                                    process[token].state[token2]);
+            }
+            if (t % 2 == 0) { // se par esta sem falha, verifica novidades
+                check_state(N, token, token2);
             }
         }
-        set_free(nodes);
     }
+    if (!tested) {
+        puts("Nenhum processo testado");
+    }
+    set_free(nodes);
     schedule(TEST, 30.0, token);
     print_state(N, token);
     process[token].tested = true;
+    count_cluster(token, logN);
     printf("==========================================\n");
     break;
 {% endhighlight %}
@@ -79,7 +74,7 @@ node_set *nodes_j = cis(j, s);
 for (int k = 0; k < nodes_j->size; ++k) {
     if (process[token].state[nodes_j->nodes[k]] % 2 == 0) {
         if (nodes_j->nodes[k] == token) {
-            to_test = nodes[j];
+            to_test = j;
         }
         break;
     }
@@ -88,7 +83,7 @@ set_free(nodes_j);
 return to_test;
 {% endhighlight %}
             <li>A função para transferência de estados foi adaptada para o VCube (versão 2). Agora são transferidas quaisquer
-                novidades que o processo encontrar sobre todos os outros processos:</li>
+                novidades que o processo encontrar sobre todos os outros processos (exceto ele mesmo):</li>
 {% highlight c %}
 for (int i = 0; i < N; ++i) {
     if (i == token)
@@ -102,5 +97,46 @@ for (int i = 0; i < N; ++i) {
     }
 }
 {% endhighlight %}
+            <li>Tratamento para assegurar o funcionamento para número de processos ímpar.</li>
+{% highlight c %}
+if (nodes->nodes[j] >= N) {
+    continue;
+}
+{% endhighlight %}
+            <li>Melhorias de comentários e logs.</li>
         </ol>
+        <h2>Execução</h2>
+        <p>Os testes a seguir foram executados para demonstrar a corretude do programa. A rodada 0 indica o estado inicial dos
+            processos. A partir da rodada 1, os estados representados nas imagens representam àqueles dos finais da respectiva
+            rodada. Os símbolos de raio indicam falha, e os de coração representam recuperação.</p>
+        <h3>Testes de Validação</h3>
+        Estes testes foram realizados para verificar as validações do programa para evitar entradas incorretas do usuário:
+        <ol>
+            <li>./vcube2</li>
+    {% highlight plaintext %}
+    Uso correto: vcube2 <numero de processos>
+    {% endhighlight %}
+            <li>./vcube2 1</li>
+    {% highlight plaintext %}
+    O numero minimo de processos e 2!
+    {% endhighlight %}
+            <li>./vcube2 2 - com um evento agendado para um processo maior que 1</li>
+    {% highlight plaintext %}
+    Este programa foi executado para N=2 processos
+    O tempo maximo de simulacao e de 350
+    
+    ******************************************
+    Iniciando round de testes 1
+    Um evento foi agendado para o processo 5, mas o maximo de processos e de 2!
+    {% endhighlight %}
+        </ol>
+        <h3>Teste 1</h3>
+        <p>Este teste foi executado para 4 processos, com o tempo máximo de simulação de 200. Os eventos agendados foram:</p>
+        <ol>
+            <li>Falha do processo 0 no tempo 35 [# testes 2, latência 2]</li>
+            <li>Recuperação do processo 0 no tempo 130 [# testes 2, latência 1]</li>
+        </ol>
+        <p>O estado de cada processo durante as rodadas pode ser visualizado na imagem abaixo:</p>
+        <img src="./img/teste1.png" alt="teste 1">
+        <p>O log deste teste pode ser visualizado abaixo:</p>
 </body>

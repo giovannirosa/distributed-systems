@@ -106,6 +106,7 @@ if (type == 1) {
     process[token].cluster = 1;
 }
 {% endhighlight %}
+            <li>Melhorias de comentários e logs.</li>
         </ol>
     <h2>Execução</h2>
     <p>Os testes a seguir foram executados para demonstrar a corretude do programa. A rodada 0 indica o estado inicial dos
@@ -141,6 +142,8 @@ Um evento foi agendado para o processo 5, mas o maximo de processos e de 2!
     <p>O estado de cada processo durante as rodadas pode ser visualizado na imagem abaixo:</p>
     <img src="./img/teste1.png" alt="teste 1">
     <p>O log deste teste pode ser visualizado abaixo:</p>
+    <details>
+        <summary>Log do teste 1</summary>
 {% highlight plaintext %}
 Este programa foi executado para N=4 processos
 O tempo maximo de simulacao e de 200
@@ -455,6 +458,7 @@ Programa finalizado com sucesso
 Autor: Giovanni Rosa :)
 ==========================================
 {% endhighlight %}
+</details>
 
 <h3>Teste 2</h3>
     <p>Este teste foi executado para 4 processos, com o tempo máximo de simulação de 320. Os eventos agendados foram:</p>
