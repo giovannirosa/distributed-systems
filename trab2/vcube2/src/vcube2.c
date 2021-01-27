@@ -366,8 +366,8 @@ void schedule_events(int N) {
   for (int i = 0; i < N; ++i) {
     schedule(TEST, 30.0, i);
   }
-  schedule(FAULT, 35.0, 1);
-  schedule(FAULT, 120.0, 2);
-  schedule(RECOVERY, 170.0, 1);
-  schedule(RECOVERY, 240.0, 2);
+  schedule(FAULT, 35.0, 7);
+  // schedule(FAULT, 120.0, 2);
+  schedule(RECOVERY, 140.0, 7);
+  // schedule(RECOVERY, 240.0, 2);
 }
