@@ -21,7 +21,7 @@ Declaracao do programa VCube (versao 1)
 #define RECOVERY 3
 
 // Tempo maximo de simulacao
-#define MAX_TIME 160
+#define MAX_TIME 280
 
 // Descritor do processo
 typedef struct {
@@ -91,8 +91,9 @@ void print_cluster(int nodes[], int token, int size);
  * Imprime o vetor de estados de um processo especifico
  * @param token index do processo
  * @param N numero total de processos
+ * @param when imprimir: antes = 0, depois = 1, nao imprimir = -1
  */
-void print_state(int, int);
+void print_state(int, int, int);
 
 /**
  * Verifica novidades do vetor de estados de um processo em relacao ao outro

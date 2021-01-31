@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
       token2 = token;
       printf("\n==========================================\n");
       printf("Iniciando testes do processo %d\n", token);
-      print_state(N, token);
+      print_state(N, token, 0);
 
       // calcula os processos do cluster a ser testado
       nodes = cis(token, process[token].cluster);
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
       } while (t != 0 && ++j < nodes->size);
       set_free(nodes);              // libera memoria
       schedule(TEST, 30.0, token);  // agenda proximo teste
-      print_state(N, token);        // imprime vetor de estados
+      print_state(N, token, 1);        // imprime vetor de estados
       process[token].tested = true; // teste concluido na rodada
       count_cluster(token, logN);   // calcula proximo cluster
       printf("==========================================\n");
@@ -236,8 +236,14 @@ void print_cluster(int nodes[], int token, int size) {
   puts("]");
 }
 
-void print_state(int N, int token) {
-  printf("State do processo %d: [", token);
+void print_state(int N, int token, int when) {
+  printf("State do processo %d", token);
+  if (when == 0) {
+    printf(" (antes)");
+  } else if (when == 1) {
+    printf(" (depois)");
+  }
+  printf(": [", token);
   for (int i = 0; i < N; ++i) {
     printf("%d", process[token].state[i]);
     if (i != N - 1) {
@@ -249,7 +255,7 @@ void print_state(int N, int token) {
 
 void check_state(int N, int token, int token2, int nodes[], int cluster,
                  int j) {
-  print_state(N, token2);
+  print_state(N, token2, -1);
   bool transfered = false;
   // verifica novidades do restante do cluster
   for (int i = j + 1; i < POW_2(cluster - 1); ++i) {
@@ -375,8 +381,8 @@ void schedule_events(int N) {
   for (int i = 0; i < N; ++i) {
     schedule(TEST, 30.0, i);
   }
-  schedule(FAULT, 35.0, 0);
-  schedule(RECOVERY, 120.0, 0);
-  // schedule(RECOVERY, 197.0, 1);
-  // schedule(RECOVERY, 260.0, 2);
+  schedule(FAULT, 35.0, 7);
+  schedule(RECOVERY, 190.0, 7);
+  //schedule(RECOVERY, 197.0, 1);
+  //schedule(RECOVERY, 260.0, 2);
 }
