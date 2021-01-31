@@ -37,15 +37,27 @@ case TEST:
     printf("\n==========================================\n");
     printf("Iniciando testes do processo %d\n", token);
     print_state(N, token);
+
+    // calcula os processos do cluster a ser testado
     nodes = cis(token, process[token].cluster);
     print_cluster(nodes->nodes, token, nodes->size);
-    j = 0;
+    int j = 0;
     do {
+        t = -1;
         token2 = nodes->nodes[j];
+
+        // tratamento para numero ímpar de processos
+        if (token2 >= N) {
+            continue;
+        }
+
+        // verifica estado do processo
         t = status(process[token2].id);
         t_result = t % 2 == 0 ? "correto" : "falho";
         printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
                 token2, time(), t_result);
+
+        // se estado mudou, atualiza vetor de estados
         if ((t == 0 && process[token].state[token2] % 2 != 0) ||
             (t == 1 && process[token].state[token2] % 2 != 1)) {
             if (process[token].state[token2] == -1) {
@@ -55,19 +67,23 @@ case TEST:
             }
             printf("State[%d] atualizado para %d\n", token2,
                     process[token].state[token2]);
+            // incrementa # testes do evento
             count_event_test(N, token, token2);
+            // analisa descoberta do evento para definir diagnostico
             count_event_discovery(N, token, token2, process[token].state[token2]);
         }
-        if (t % 2 == 0) { // se par esta sem falha, verifica novidades
+
+        // se par esta sem falha, verifica novidades
+        if (t % 2 == 0) {
             check_state(N, token, token2, nodes->nodes, process[token].cluster,
                         j);
         }
     } while (t != 0 && ++j < nodes->size);
-    set_free(nodes);
-    schedule(TEST, 30.0, token);
-    print_state(N, token);
-    process[token].tested = true;
-    count_cluster(token, logN);
+    set_free(nodes);              // libera memoria
+    schedule(TEST, 30.0, token);  // agenda proximo teste
+    print_state(N, token);        // imprime vetor de estados
+    process[token].tested = true; // teste concluido na rodada
+    count_cluster(token, logN);   // calcula proximo cluster
     printf("==========================================\n");
     break;
 {% endhighlight %}
