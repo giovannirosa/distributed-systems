@@ -106,6 +106,12 @@ if (type == 1) {
     process[token].cluster = 1;
 }
 {% endhighlight %}
+            <li>Tratamento para assegurar o funcionamento para número de processos ímpar.</li>
+{% highlight c %}
+if (token2 >= N) {
+    continue;
+  }
+{% endhighlight %}
             <li>Melhorias de comentários e logs.</li>
         </ol>
     <h2>Execução</h2>

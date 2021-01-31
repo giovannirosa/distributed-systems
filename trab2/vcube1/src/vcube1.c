@@ -1,6 +1,6 @@
 /*
   Autor: Giovanni Rosa
-  Ultima modificao: 26/01/2021
+  Ultima modificao: 31/01/2021
 
 Programa dedicado a implementacao do VCube (versao 1) como requisito para o
 Trabalho Pratico 2 da disciplina de Sistemas Distribuidos.
@@ -35,8 +35,8 @@ correspondente no vetor STATE[].
 #include "vcube1.h"
 
 int main(int argc, char *argv[]) {
-  static int N,              // numero de processos
-      token,                 // processo que esta executando
+  static int N,        // numero de processos
+      token,           // processo que esta executando
       e, r, t, token2; // variaveis auxiliares
 
   const char *t_result;
@@ -46,14 +46,14 @@ int main(int argc, char *argv[]) {
   // inicializacao da lista de eventos
   event_array = init_array();
 
-  // processar entradas do usuario
+  // processa entradas do usuario
   user_input(&N, argc, argv);
 
   smpl(0, "Simulacao do Trabalho Pratico 2");
   reset();
   stream(1);
 
-  // inicializar processos
+  // inicializa processos
   init_process(N);
 
   // escalonamento inicial de eventos
@@ -62,12 +62,15 @@ int main(int argc, char *argv[]) {
   // processos no tempo 30
   schedule_events(N);
 
+  // calcula valor de logN
   int logN = ceil(log2(N));
 
   // loop principal do simulador
   while (time() < MAX_TIME) {
     cause(&e, &token);
+    // verifica novo round
     count_round(N, logN);
+    // verifica se um evento foi agendado para processo inexistente
     if (token > N - 1) {
       printf("Um evento foi agendado para o processo %d, mas o maximo de "
              "processos e de %d!\n",
@@ -82,19 +85,27 @@ int main(int argc, char *argv[]) {
       printf("\n==========================================\n");
       printf("Iniciando testes do processo %d\n", token);
       print_state(N, token);
+
+      // calcula os processos do cluster a ser testado
       nodes = cis(token, process[token].cluster);
       print_cluster(nodes->nodes, token, nodes->size);
       int j = 0;
       do {
         t = -1;
         token2 = nodes->nodes[j];
+
+        // tratamento para numero ímpar de processos
         if (token2 >= N) {
           continue;
         }
+
+        // verifica estado do processo
         t = status(process[token2].id);
         t_result = t % 2 == 0 ? "correto" : "falho";
         printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
                token2, time(), t_result);
+
+        // se estado mudou, atualiza vetor de estados
         if ((t == 0 && process[token].state[token2] % 2 != 0) ||
             (t == 1 && process[token].state[token2] % 2 != 1)) {
           if (process[token].state[token2] == -1) {
@@ -104,19 +115,23 @@ int main(int argc, char *argv[]) {
           }
           printf("State[%d] atualizado para %d\n", token2,
                  process[token].state[token2]);
+          // incrementa # testes do evento
           count_event_test(N, token, token2);
+          // analisa descoberta do evento para definir diagnostico
           count_event_discovery(N, token, token2, process[token].state[token2]);
         }
-        if (t % 2 == 0) { // se par esta sem falha, verifica novidades
+
+        // se par esta sem falha, verifica novidades
+        if (t % 2 == 0) {
           check_state(N, token, token2, nodes->nodes, process[token].cluster,
                       j);
         }
       } while (t != 0 && ++j < nodes->size);
-      set_free(nodes);
-      schedule(TEST, 30.0, token);
-      print_state(N, token);
-      process[token].tested = true;
-      count_cluster(token, logN);
+      set_free(nodes);              // libera memoria
+      schedule(TEST, 30.0, token);  // agenda proximo teste
+      print_state(N, token);        // imprime vetor de estados
+      process[token].tested = true; // teste concluido na rodada
+      count_cluster(token, logN);   // calcula proximo cluster
       printf("==========================================\n");
       break;
     case FAULT:
@@ -126,6 +141,8 @@ int main(int argc, char *argv[]) {
         delay_event(FAULT, token);
         break;
       }
+
+      // cria evento de falha
       create_event(N, 1, token);
       r = request(process[token].id, token, 0);
       if (r != 0) {
@@ -143,6 +160,8 @@ int main(int argc, char *argv[]) {
         delay_event(RECOVERY, token);
         break;
       }
+
+      // cria evento de recuperacao
       create_event(N, 0, token);
       release(process[token].id, token);
       printf("\n--> Event[%d]: Processo %d recuperou no tempo %4.1f\n",
@@ -157,7 +176,10 @@ int main(int argc, char *argv[]) {
 
   puts("\n==========================================");
 
+  // imprime eventos da simulacao
   print_event_array();
+
+  // libera memoria
   free_array(event_array);
   free(process);
 
@@ -177,12 +199,15 @@ void count_cluster(int token, int logN) {
 
 void count_round(int N, int logN) {
   bool all_tested = true;
+  // verifica se todos os processos ja testaram na rodada
   for (int i = 0; i < N; ++i) {
     if (process[i].state[i] % 2 == 0 && !process[i].tested) {
       all_tested = false;
       break;
     }
   }
+
+  // se sim, inicia novo round
   if (all_tested) {
     ++sim_round;
     puts("\n******************************************");
@@ -203,7 +228,7 @@ void delay_event(int type, int token) {
 void print_cluster(int nodes[], int token, int size) {
   printf("Testando cluster %d: [", process[token].cluster);
   for (int i = 0; i < size; ++i) {
-    printf("%i", nodes[i]);
+    printf("%d", nodes[i]);
     if (i != size - 1) {
       printf(", ");
     }
@@ -212,23 +237,24 @@ void print_cluster(int nodes[], int token, int size) {
 }
 
 void print_state(int N, int token) {
-  printf("State do processo %d: ", token);
+  printf("State do processo %d: [", token);
   for (int i = 0; i < N; ++i) {
-    printf("%d[%d] ", i, process[token].state[i]);
+    printf("%d", process[token].state[i]);
+    if (i != N - 1) {
+      printf(", ");
+    }
   }
-  puts("");
+  puts("]");
 }
 
 void check_state(int N, int token, int token2, int nodes[], int cluster,
                  int j) {
-  printf("Atualizando state do processo %d com o state do processo %d\n", token,
-         token2);
   print_state(N, token2);
   bool transfered = false;
+  // verifica novidades do restante do cluster
   for (int i = j + 1; i < POW_2(cluster - 1); ++i) {
     if (process[token2].state[nodes[i]] > process[token].state[nodes[i]]) {
       transfered = true;
-      printf("Novidade encontrada, transferindo state[%d]...\n", nodes[i]);
       printf("State[%d] atualizado para %d\n", nodes[i],
              process[token2].state[nodes[i]]);
       process[token].state[nodes[i]] = process[token2].state[nodes[i]];
@@ -255,9 +281,11 @@ void count_event_discovery(int N, int token, int token2, int state) {
       }
     }
     if (diag) {
-      printf("--> Diagnostico do evento %d completo\n", event->id);
       event->diag = true;
       event->latency = sim_round - event->e_round;
+      printf("--> Diagnostico do evento %d completo [# testes = %d, latência = "
+             "%d]\n",
+             event->id, event->n_tests, event->latency);
     }
   }
 }
@@ -295,7 +323,7 @@ void create_event(int N, int type, int token) {
   event->latency = -1;
   insert_array(event_array, event);
 
-  // se falha, reseta o vetor de estados e cluster, pois é falha crash
+  // se falha, reseta o vetor de estados e cluster, pois e falha crash
   if (type == 1) {
     for (int i = (token + 1) % N;; i = (i + 1) % N) {
       if (i == token)
