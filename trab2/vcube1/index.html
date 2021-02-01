@@ -101,12 +101,11 @@ if (process[token].cluster == logN) {
 for (int i = j + 1; i < POW_2(cluster - 1); ++i) {
     if (process[token2].state[nodes[i]] > process[token].state[nodes[i]]) {
         transfered = true;
-        printf("Novidade encontrada, transferindo state[%d]...\n", nodes[i]);
         printf("State[%d] atualizado para %d\n", nodes[i],
                 process[token2].state[nodes[i]]);
         process[token].state[nodes[i]] = process[token2].state[nodes[i]];
         count_event_discovery(N, token, nodes[i],
-                            process[token2].state[nodes[i]]);
+                                process[token2].state[nodes[i]]);
     }
 }
 {% endhighlight %}
