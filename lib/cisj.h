@@ -2,7 +2,7 @@
   Autor: Giovanni Rosa
   Ultima modificao: 14/01/2021
 
-Declaracao da função Cisj
+Declaracao da funcao Cisj
 */
 
 #ifndef CISJ_H

@@ -1,6 +1,6 @@
 /*
   Autor: Giovanni Rosa
-  Ultima modificao: 26/01/2021
+  Ultima modificao: 31/01/2021
 
 Declaracao do programa VCube (versao 1)
 */

@@ -49,26 +49,3 @@ node_set *cis(int i, int s) {
   }
   return nodes;
 }
-
-// int next_cis(int i, int s, int j) {
-//   node_set *nodes;
-
-//   /* have we the third parameter? */
-//   if (j != NULL && !VALID_J(j, s)) {
-//     printf("%d is not a valid node for a cluster size %d.\n", j, s);
-//     exit(1);
-//   }
-//   /* calculating cis */
-//   nodes = cis(i, s);
-
-//   /* print all nodes or just one? */
-//   if (j != -1)
-//     printf("%i\n", nodes->nodes[j - 1]);
-//   else {
-//     for (i = 0; i < nodes->size; i++)
-//       printf("%i ", nodes->nodes[i]);
-//     puts("");
-//   }
-//   set_free(nodes);
-//   return 0;
-// }

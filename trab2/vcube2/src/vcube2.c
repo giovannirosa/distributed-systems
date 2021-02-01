@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
         break; // se processo falho, nao testa
       printf("\n==========================================\n");
       printf("Iniciando testes do processo %d\n", token);
-      print_state(N, token);
+      print_state(N, token, 0);
 
       // calcula os processos do cluster a ser testado
       nodes = cis(token, process[token].cluster);
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
       }
       set_free(nodes);              // libera memoria
       schedule(TEST, 30.0, token);  // agenda proximo teste
-      print_state(N, token);        // imprime vetor de estados
+      print_state(N, token, 1);        // imprime vetor de estados
       process[token].tested = true; // teste concluido na rodada
       count_cluster(token, logN);   // calcula proximo cluster
       printf("==========================================\n");
@@ -262,18 +262,25 @@ void print_cluster(int nodes[], int token, int size) {
   puts("]");
 }
 
-void print_state(int N, int token) {
-  printf("State do processo %d: ", token);
-  for (int i = 0; i < N; ++i) {
-    printf("%d[%d] ", i, process[token].state[i]);
+void print_state(int N, int token, int when) {
+  printf("State do processo %d", token);
+  if (when == 0) {
+    printf(" (antes)");
+  } else if (when == 1) {
+    printf(" (depois)");
   }
-  puts("");
+  printf(": [", token);
+  for (int i = 0; i < N; ++i) {
+    printf("%d", process[token].state[i]);
+    if (i != N - 1) {
+      printf(", ");
+    }
+  }
+  puts("]");
 }
 
 void check_state(int N, int token, int token2) {
-  printf("Atualizando state do processo %d com o state do processo %d\n", token,
-         token2);
-  print_state(N, token2);
+  print_state(N, token2, -1);
   bool transfered = false;
   // verifica quaisquer novidades, exceto do proprio processo ou do testado
   for (int i = 0; i < N; ++i) {
@@ -281,7 +288,6 @@ void check_state(int N, int token, int token2) {
       continue;
     if (process[token2].state[i] > process[token].state[i]) {
       transfered = true;
-      printf("Novidade encontrada, transferindo state[%d]...\n", i);
       printf("State[%d] atualizado para %d\n", i, process[token2].state[i]);
       process[token].state[i] = process[token2].state[i];
       count_event_discovery(N, token, i, process[token2].state[i]);
@@ -400,7 +406,7 @@ void schedule_events(int N) {
     schedule(TEST, 30.0, i);
   }
   schedule(FAULT, 35.0, 7);
-  // schedule(FAULT, 120.0, 2);
-  schedule(RECOVERY, 140.0, 7);
-  // schedule(RECOVERY, 240.0, 2);
+  schedule(RECOVERY, 130.0, 7);
+  //schedule(RECOVERY, 170.0, 1);
+  //schedule(RECOVERY, 240.0, 2);
 }
