@@ -5,8 +5,8 @@
 Declaracao do programa VCube (versao 1)
 */
 
-#ifndef VRING_H
-#define VRING_H
+#ifndef VCUBE_H
+#define VCUBE_H
 
 #include "../../../lib/array.h"
 #include "../../../lib/cisj.h"

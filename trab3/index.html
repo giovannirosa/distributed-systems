@@ -1,0 +1,22 @@
+---
+layout: default
+title: Trabalho Prático 3
+---
+
+<body>
+    <a href="../">Voltar</a>
+    <h1>Trabalho Prático 3</h1>
+    <p><b>Especificação:</b> Implemente o algoritmo de Best-Effort Broadcast sobre o VCube. O programa deve receber como
+        entradas: o processo fonte do broadcast, o número de nodos do sistema e uma lista de nodos para falhar durante a
+        execução. Deve ser possível tanto definir processos que estarão falhos durante toda a execução, como processos
+        que falham em momentos específicos.</p>
+    <p>Além disso, deve ser possível fazer uma execução com escalonamento de falhas definidas aleatoriamente. Em outras
+        palavras: quando vc executa o algoritmo usando esta abordagem, processos escolhidos aleatoriamente vão falhar
+        entre o início e o fim do broadcast.</p>
+    <p>No relatório, explique cuidadosamente como vc implementou cada função e o algoritmo como um todo. Mostre os logs
+        com cuidado, de forma que seja possível ver com clareza o progresso do broadcast, inclusive após a ocorrência de
+        falhas. Um caso que deve estar nos logs é o seguinte: um processo aguarda o ACK de outro processo. Em seguida
+        (antes de receber o ACK) o processo que deveria mandar o ACK falha. Agora o processo que aguardava o ACK deve
+        mandar uma nova mensagem para outro processo do cluster do processo que falhou. Deve ser fácil visualizar toda
+        esta situação no seu log!</p>
+</body>

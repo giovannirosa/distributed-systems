@@ -8,9 +8,9 @@ Declaracao do programa VCube (versao 2)
 #ifndef VCUBE_H
 #define VCUBE_H
 
-#include "../../../lib/array.h"
-#include "../../../lib/cisj.h"
-#include "../../../lib/smpl.h"
+#include "./array.h"
+#include "./cisj.h"
+#include "./smpl.h"
 #include <stdbool.h>
 
 // Evento de teste
@@ -35,7 +35,7 @@ typedef struct {
 ProcessType *process;
 
 // Controle de ID dos eventos
-int id_cont = 0;
+static int id_cont = 0;
 
 // Descritor do evento
 typedef struct {
@@ -56,7 +56,7 @@ Event *event;
 Array event_array;
 
 // Rodada atual da simulacao
-int sim_round = 0;
+static int sim_round = 0;
 
 /**
  * Verifica se o processo é testador de outro em determinado cluster
@@ -143,23 +143,9 @@ void print_event_array();
 void create_event(int, int, int);
 
 /**
- * Processa as entradas do usuario
- * @param N numero total de processos
- * @param argc quantidade de argumentos
- * @param argc vetor de argumentos
- */
-void user_input(int *, int, char *[]);
-
-/**
  * Inicializa processos na memoria
  * @param N numero total de processos
  */
 void init_process(int);
-
-/**
- * Agenda os eventos que ocorrerao durante a simulacao
- * @param N numero total de processos
- */
-void schedule_events(int);
 
 #endif
