@@ -9,7 +9,21 @@ Declaracao do programa VCube (versao 2)
 #define BEBCAST_H
 
 #include "../../lib/vcube2.h"
+#include <regex.h>
 
-void user_input(int *, int *, char *, int, char *[]);
+// Descritor da lista de falhas
+typedef struct {
+  int id;      // identificador do processo
+  bool failed; // inicialmente falho
+} Fault;
+
+// Vetor de processos da simulacao
+Fault *fault;
+
+void user_input(int *, int *, int *, char *, int, char *[]);
+void build_faults(char *, int, int *);
+int occurrences(char *, char);
+void schedule_events(int, int);
+bool search_fault_failed(int, int);
 
 #endif

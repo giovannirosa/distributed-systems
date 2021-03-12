@@ -59,6 +59,44 @@ Array event_array;
 static int sim_round = 0;
 
 /**
+ * Falha o processo
+ * @param token processo a falhar
+ * @param N numero total de processos
+ * @param logN log do numero total de processos
+ */
+bool test(int token, int N, int logN);
+
+/**
+ * Falha o processo
+ * @param token processo a falhar
+ * @param N numero total de processos
+ */
+bool failure(int token, int N);
+
+/**
+ * Recupera o processo
+ * @param token processo a recuperar
+ * @param N numero total de processos
+ */
+bool recovery(int token, int N);
+
+/**
+ * Retorna o indice do cluster de j a que i pertence
+ * @param i processo a ser verificado se pertence ao cluster
+ * @param j processo a ser verificado os clusters
+ * @param logN log do numero total de processos
+ */
+int cluster(int i, int j, int logN);
+
+/**
+ * Retorna o primeiro processo correto no cluster
+ * @param i processo a ter o cluster verificado
+ * @param s indice do cluster
+ * @param token processo a ter os estados verificados
+ */
+int FFneighbor(int i, int s, int token);
+
+/**
  * Verifica se o processo é testador de outro em determinado cluster
  * @param j processo potencial testado
  * @param s index do cluster
@@ -72,21 +110,21 @@ int verify_tester(int j, int s, int token);
  * @param token index do processo
  * @param logN log na base 2 do numero total de processos
  */
-void count_cluster(int, int);
+void count_cluster(int token, int logN);
 
 /**
  * Verifica se todos os processos sem falha testaram na rodada atual
  * @param N numero total de processos
  * @param logN log na base 2 do numero total de processos
  */
-void count_round(int, int);
+void count_round(int N, int logN);
 
 /**
  * Adia evento para a proxima rodada
  * @param type tipo do evento: 0 = recuperacao, 1 = falha
  * @param token index do processo em que o evento estava agendado
  */
-void delay_event(int, int);
+void delay_event(int type, int token);
 
 /**
  * Imprime os processos do cluster
@@ -94,15 +132,15 @@ void delay_event(int, int);
  * @param cluster index do cluster
  * @param size tamanho do vetor de processos do cluster
  */
-void print_cluster(int nodes[], int token, int size);
+void print_cluster(int nodes[], int cluster, int size);
 
 /**
  * Imprime o vetor de estados de um processo especifico
- * @param token index do processo
  * @param N numero total de processos
+ * @param token index do processo
  * @param when imprimir: antes = 0, depois = 1, nao imprimir = -1
  */
-void print_state(int, int, int);
+void print_state(int N, int token, int when);
 
 /**
  * Verifica novidades do vetor de estados de um processo em relacao ao outro
@@ -110,7 +148,7 @@ void print_state(int, int, int);
  * @param token index do processo testador
  * @param token2 index do processo testado
  */
-void check_state(int, int, int);
+void check_state(int N, int token, int token2);
 
 /**
  * Contabiliza descoberta do evento por um processo
@@ -119,7 +157,7 @@ void check_state(int, int, int);
  * @param token2 index do processo testado
  * @param state valor do estado da descoberta
  */
-void count_event_discovery(int, int, int, int);
+void count_event_discovery(int N, int token, int token2, int state);
 
 /**
  * Contabiliza teste do evento por um processo
@@ -127,7 +165,7 @@ void count_event_discovery(int, int, int, int);
  * @param token index do processo testador
  * @param token2 index do processo testado
  */
-void count_event_test(int, int, int);
+void count_event_test(int N, int token, int token2);
 
 /**
  * Imprime vetor com todos os eventos da simulacao
@@ -140,12 +178,12 @@ void print_event_array();
  * @param type tipo do evento: 0 = recuperacao, 1 = falha
  * @param token index do processo em que o evento ocorreu
  */
-void create_event(int, int, int);
+void create_event(int N, int type, int token);
 
 /**
  * Inicializa processos na memoria
  * @param N numero total de processos
  */
-void init_process(int);
+void init_process(int N);
 
 #endif

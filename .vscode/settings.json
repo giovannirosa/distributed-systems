@@ -3,6 +3,8 @@
         "vcube2.h": "c",
         "array.h": "c",
         "cisj.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "sstream": "c",
+        "algorithm": "c"
     }
 }

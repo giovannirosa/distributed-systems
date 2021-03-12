@@ -30,6 +30,7 @@ toda esta situacao no seu log!
 
 int main(int argc, char *argv[]) {
   static int N,        // numero de processos
+      N_faults,        // numero de falhas
       source,          // fonte do broadcast
       token,           // processo que esta executando
       e, r, t, token2; // variaveis auxiliares
@@ -44,7 +45,7 @@ int main(int argc, char *argv[]) {
   event_array = init_array();
 
   // processa entradas do usuario
-  user_input(&source, &N, faults, argc, argv);
+  user_input(&source, &N, &N_faults, faults, argc, argv);
 
   smpl(0, "Simulacao do Trabalho Pratico 3");
   reset();
@@ -53,16 +54,27 @@ int main(int argc, char *argv[]) {
   // inicializa processos
   init_process(N);
 
+  // Use current time as seed for random generator
+  // double seed = 123;
+  // printf("random seed = %lf\n", seed);
+  // srand(seed);
+
   // escalonamento inicial de eventos
   // intervalo de testes de 30 unidades de tempo
   // simulacao comeca no tempo zero e escalonar o primeiro teste de todos os
   // processos no tempo 30
-  // schedule_events(N);
+  schedule_events(N, N_faults);
 
   // calcula valor de logN
   int logN = ceil(log2(N));
 
-  // loop principal do simulador
+  printf("FFneighbor(0,1) = %d, FFneighbor(0,2) = %d, FFneighbor(0,3) = %d\n", FFneighbor(0,1,0), FFneighbor(0,2,0), FFneighbor(0,3,0));
+  printf("FFneighbor(1,1) = %d, FFneighbor(1,2) = %d, FFneighbor(1,3) = %d\n", FFneighbor(1,1,1), FFneighbor(1,2,1), FFneighbor(1,3,1));
+  printf("FFneighbor(3,1) = %d, FFneighbor(3,2) = %d, FFneighbor(3,3) = %d\n", FFneighbor(3,1,3), FFneighbor(3,2,3), FFneighbor(3,3,3));
+  printf("FFneighbor(6,1) = %d, FFneighbor(6,2) = %d, FFneighbor(6,3) = %d\n", FFneighbor(6,1,6), FFneighbor(6,2,6), FFneighbor(6,3,6));
+  printf("FFneighbor(7,1) = %d, FFneighbor(7,2) = %d, FFneighbor(7,3) = %d\n", FFneighbor(7,1,7), FFneighbor(7,2,7), FFneighbor(7,3,7));
+
+  // // loop principal do simulador
   // while (time() < MAX_TIME) {
   //   cause(&e, &token);
   //   // verifica novo round
@@ -76,104 +88,13 @@ int main(int argc, char *argv[]) {
   //   }
   //   switch (e) {
   //   case TEST:
-  //     if (status(process[token].id) != 0)
-  //       break; // se processo falho, nao testa
-  //     printf("\n==========================================\n");
-  //     printf("Iniciando testes do processo %d\n", token);
-  //     print_state(N, token, 0);
-
-  //     // calcula os processos do cluster a ser testado
-  //     nodes = cis(token, process[token].cluster);
-  //     print_cluster(nodes->nodes, token, nodes->size);
-
-  //     bool tested = false;
-  //     // verifica processos do cluster
-  //     for (int j = 0; j < nodes->size; ++j) {
-  //       // tratamento para numero ímpar de processos
-  //       if (nodes->nodes[j] >= N) {
-  //         continue;
-  //       }
-
-  //       // verifica se é testador do processo j no cluster
-  //       token2 = verify_tester(nodes->nodes[j], process[token].cluster,
-  //       token); if (token2 != -1) {
-  //         tested = true;
-
-  //         // verifica estado do processo
-  //         t = status(process[token2].id);
-  //         t_result = t % 2 == 0 ? "correto" : "falho";
-  //         printf("Processo %d testou processo %d no tempo %4.1f: %s\n",
-  //         token,
-  //                token2, time(), t_result);
-
-  //         // se estado mudou, atualiza vetor de estados
-  //         if ((t == 0 && process[token].state[token2] % 2 != 0) ||
-  //             (t == 1 && process[token].state[token2] % 2 != 1)) {
-  //           if (process[token].state[token2] == -1) {
-  //             process[token].state[token2] = t;
-  //           } else {
-  //             ++process[token].state[token2];
-  //           }
-  //           printf("State[%d] atualizado para %d\n", token2,
-  //                  process[token].state[token2]);
-  //           // incrementa # testes do evento
-  //           count_event_test(N, token, token2);
-  //           // analisa descoberta do evento para definir diagnostico
-  //           count_event_discovery(N, token, token2,
-  //                                 process[token].state[token2]);
-  //         }
-
-  //         // se par esta sem falha, verifica novidades
-  //         if (t % 2 == 0) {
-  //           check_state(N, token, token2);
-  //         }
-  //       }
-  //     }
-  //     if (!tested) {
-  //       puts("Nenhum processo testado");
-  //     }
-  //     set_free(nodes);              // libera memoria
-  //     schedule(TEST, 30.0, token);  // agenda proximo teste
-  //     print_state(N, token, 1);     // imprime vetor de estados
-  //     process[token].tested = true; // teste concluido na rodada
-  //     count_cluster(token, logN);   // calcula proximo cluster
-  //     printf("==========================================\n");
+  //     test(token, N, logN);
   //     break;
   //   case FAULT:
-  //     // se o evento anterior nao foi diagnosticado ainda, adia o evento para
-  //     a
-  //     // proxima rodada
-  //     if (event != NULL && !event->diag) {
-  //       delay_event(FAULT, token);
-  //       break;
-  //     }
-
-  //     // cria evento de falha
-  //     create_event(N, 1, token);
-  //     r = request(process[token].id, token, 0);
-  //     if (r != 0) {
-  //       printf("\nNao foi possivel falhar o processo %d\n", token);
-  //       exit(1);
-  //     } else {
-  //       printf("\n--> Event[%d]: Processo %d falhou no tempo %4.1f\n",
-  //              event->id, token, time());
-  //     }
+  //     failure(token, N);
   //     break;
   //   case RECOVERY:
-  //     // se o evento anterior nao foi diagnosticado ainda, adia o evento para
-  //     a
-  //     // proxima rodada
-  //     if (event != NULL && !event->diag) {
-  //       delay_event(RECOVERY, token);
-  //       break;
-  //     }
-
-  //     // cria evento de recuperacao
-  //     create_event(N, 0, token);
-  //     release(process[token].id, token);
-  //     printf("\n--> Event[%d]: Processo %d recuperou no tempo %4.1f\n",
-  //            event->id, token, time());
-  //     schedule(TEST, 30.0, token);
+  //     recovery(token, N);
   //     break;
   //   }
   // }
@@ -189,6 +110,7 @@ int main(int argc, char *argv[]) {
   // libera memoria
   free_array(event_array);
   free(process);
+  free(fault);
 
   puts("\n==========================================");
   puts("Programa finalizado com sucesso");
@@ -196,22 +118,148 @@ int main(int argc, char *argv[]) {
   puts("==========================================");
 }
 
-void user_input(int *source, int *N, char *faults, int argc, char *argv[]) {
-  if (argc != 4) {
+void user_input(int *source, int *N, int *N_faults, char *faults, int argc,
+                char *argv[]) {
+  if (argc != 3 && argc != 4) {
     puts("Uso correto: bebcast <fonte do broadcast> <numero de processos> "
-         "<lista de falhas>");
+         "<lista de falhas opcional (#,#:#)>");
     exit(1);
   }
 
   *source = atoi(argv[1]);
   *N = atoi(argv[2]);
-  faults = argv[3];
-  printf("source = %i, N = %i, faults = %s\n", *source, *N, faults);
-  if (*N < 2) {
+  if (argc == 4) {
+    faults = argv[3];
+    printf("source = %i, N = %i, faults = %s\n", *source, *N, faults);
+    build_faults(faults, *N, N_faults);
+  } else {
+    printf("source = %i, N = %i\n", *source, *N);
+  }
+
+  if (*source >= *N) {
+    printf("O processo fonte %d (F) deve estar dentro do numero de processos "
+           "%d (N)! "
+           "[F < N]\n",
+           *source, *N);
+    exit(1);
+  } else if (*N < 2) {
     printf("O numero minimo de processos e 2!\n");
+    exit(1);
+  } else if (fault == NULL) {
+    printf("A lista de falhas deve seguir o formato: <processo>:<tempo da "
+           "falha opcional>\n\t\t\t\tex.: 0:30,2:60,5,7:120\n");
     exit(1);
   } else {
     printf("Este programa foi executado para N=%d processos\n", *N);
     printf("O tempo maximo de simulacao e de %d\n", MAX_TIME);
   }
+}
+
+void build_faults(char *faults, int N, int *N_faults) {
+  int ent = 0;
+  *N_faults = occurrences(faults, ',') + 1;
+  char **semiresult = malloc(sizeof(char *) * *N_faults);
+  char *token = strtok(faults, ",");
+  while (token != NULL) {
+    semiresult[ent] = malloc(strlen(token) + 1);
+    strcpy(semiresult[ent++], token);
+    token = strtok(NULL, ",");
+  }
+  free(token);
+
+  fault = malloc(sizeof(Fault) * *N_faults);
+  for (int i = 0; i < *N_faults; i++) {
+    int number_tokens = occurrences(semiresult[i], ':') + 1;
+    if (number_tokens == 1) {
+      fault[i].id = atoi(semiresult[i]);
+      fault[i].failed = false;
+    } else {
+      char *token2 = strtok(semiresult[i], ":");
+      ent = 0;
+      while (token2 != NULL) {
+        if (ent++ == 0) {
+          fault[i].id = atoi(token2);
+        } else {
+          fault[i].failed = atoi(token2) == 1;
+        }
+        token2 = strtok(NULL, ":");
+      }
+    }
+    free(semiresult[i]);
+    if (fault[i].id >= N) {
+      printf("O processo %d (F) da lista de falhas deve estar dentro do numero "
+             "de processos %d (N)! [F < N]\n",
+             fault[i].id, N);
+      exit(1);
+    }
+  }
+  free(semiresult);
+}
+
+int occurrences(char *str, char del) {
+  int len = strlen(str);
+  int c = 0;
+  for (int i = 0; i < len; ++i) {
+    if (str[i] == del) {
+      c++;
+    }
+  }
+  return c;
+}
+
+void schedule_events(int N, int N_faults) {
+  // escalonamento inicial
+  for (int i = 0; i < N; ++i) {
+    schedule(TEST, 30.0, i);
+  }
+  for (int i = 0; i < N_faults; i++) {
+    for (int j = 0; j < N; ++j) {
+      process[i].state[j] = 0;
+    }
+  }
+
+  int init = 60;
+  for (int i = 0; i < N_faults; i++) {
+    printf("id = %d, failed = %s\n", fault[i].id,
+           fault[i].failed ? "true" : "false");
+    if (fault[i].failed) {
+      for (int j = 0; j < N; ++j) {
+        process[j].state[fault[i].id] = 1;
+      }
+    } else {
+      schedule(FAULT, init, fault[i].id);
+    }
+  }
+
+  for (int i = 0; i < N; ++i) {
+    print_state(N, i, -1);
+  }
+
+  // for (int i = 0; i < N_faults; i++) {
+  // printf("id = %d, time = %d\n", fault[i].id, fault[i].time);
+  // if (fault[i].time == -1) {
+  //   schedule(FAULT, gen_rand(MAX_TIME, 10) * 30, i);
+  // } else if (fault[i].time == 0) {
+
+  // } else {
+  //   schedule(FAULT, fault[i].time, i);
+  // }
+  // }
+  // schedule(FAULT, 35.0, 7);
+  // schedule(RECOVERY, 130.0, 7);
+  // schedule(RECOVERY, 170.0, 1);
+  // schedule(RECOVERY, 240.0, 2);
+}
+
+bool search_fault_failed(int p, int N_faults) {
+  for (int i = 0; i < N_faults; i++) {
+    if (fault[i].id == p) {
+      return fault[i].failed;
+    }
+  }
+  return false;
+}
+
+int gen_rand(int upper, int lower) {
+  return (rand() % (upper - lower + 1)) + lower;
 }

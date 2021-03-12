@@ -34,22 +34,141 @@ correspondente no vetor STATE[].
 
 #include "vcube2.h"
 
-int verify_tester(int j, int s, int token) {
-  int to_test = -1;
-  // calcula cluster do processo j
-  node_set *nodes_j = cis(j, s);
-  // verifica se o processo (token) é o primeiro sem falha no cluster do
-  // processo j
+bool test(int token, int N, int logN) {
+  if (status(process[token].id) != 0)
+    return false; // se processo falho, nao testa
+  printf("\n==========================================\n");
+  printf("Iniciando testes do processo %d\n", token);
+  print_state(N, token, 0);
+
+  // calcula os processos do cluster a ser testado
+  node_set *nodes = cis(token, process[token].cluster);
+  print_cluster(nodes->nodes, token, nodes->size);
+
+  bool tested = false;
+  // verifica processos do cluster
+  for (int j = 0; j < nodes->size; ++j) {
+    // tratamento para numero ímpar de processos
+    if (nodes->nodes[j] >= N) {
+      continue;
+    }
+
+    // verifica se é testador do processo j no cluster
+    int token2 = verify_tester(nodes->nodes[j], process[token].cluster, token);
+    if (token2 != -1) {
+      tested = true;
+
+      // verifica estado do processo
+      int t = status(process[token2].id);
+      printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
+             token2, time(), t % 2 == 0 ? "correto" : "falho");
+
+      // se estado mudou, atualiza vetor de estados
+      if ((t == 0 && process[token].state[token2] % 2 != 0) ||
+          (t == 1 && process[token].state[token2] % 2 != 1)) {
+        if (process[token].state[token2] == -1) {
+          process[token].state[token2] = t;
+        } else {
+          ++process[token].state[token2];
+        }
+        printf("State[%d] atualizado para %d\n", token2,
+               process[token].state[token2]);
+        // incrementa # testes do evento
+        count_event_test(N, token, token2);
+        // analisa descoberta do evento para definir diagnostico
+        count_event_discovery(N, token, token2, process[token].state[token2]);
+      }
+
+      // se par esta sem falha, verifica novidades
+      if (t % 2 == 0) {
+        check_state(N, token, token2);
+      }
+    }
+  }
+  if (!tested) {
+    puts("Nenhum processo testado");
+  }
+  set_free(nodes);              // libera memoria
+  schedule(TEST, 30.0, token);  // agenda proximo teste
+  print_state(N, token, 1);     // imprime vetor de estados
+  process[token].tested = true; // teste concluido na rodada
+  count_cluster(token, logN);   // calcula proximo cluster
+  printf("==========================================\n");
+  return true;
+}
+
+bool failure(int token, int N) {
+  // se o evento anterior nao foi diagnosticado ainda, adia o evento para a
+  // proxima rodada
+  if (event != NULL && !event->diag) {
+    delay_event(FAULT, token);
+    return false;
+  }
+
+  // cria evento de falha
+  create_event(N, 1, token);
+  int r = request(process[token].id, token, 0);
+  if (r != 0) {
+    printf("\nNao foi possivel falhar o processo %d\n", token);
+    exit(1);
+  } else {
+    printf("\n--> Event[%d]: Processo %d falhou no tempo %4.1f\n", event->id,
+           token, time());
+  }
+  return true;
+}
+
+bool recovery(int token, int N) {
+  // se o evento anterior nao foi diagnosticado ainda, adia o evento para a
+  // proxima rodada
+  if (event != NULL && !event->diag) {
+    delay_event(RECOVERY, token);
+    return false;
+  }
+
+  // cria evento de recuperacao
+  create_event(N, 0, token);
+  release(process[token].id, token);
+  printf("\n--> Event[%d]: Processo %d recuperou no tempo %4.1f\n", event->id,
+         token, time());
+  schedule(TEST, 30.0, token);
+  return true;
+}
+
+int cluster(int i, int j, int logN) {
+  for (int s = 1; s <= logN; ++s) {
+    node_set *nodes_j = cis(j, s);
+    for (int k = 0; k < nodes_j->size; ++k) {
+      if (nodes_j->nodes[k] == i) {
+        return s;
+      }
+    }
+  }
+  return 0;
+}
+
+int FFneighbor(int i, int s, int token) {
+  int first = -1;
+  node_set *nodes_j = cis(i, s);
   for (int k = 0; k < nodes_j->size; ++k) {
     if (process[token].state[nodes_j->nodes[k]] % 2 == 0) {
-      if (nodes_j->nodes[k] == token) {
-        // se sim, sera o testador no cluster s da rodada atual
-        to_test = j;
-      }
+      first = nodes_j->nodes[k];
       break;
     }
   }
   set_free(nodes_j);
+  return first;
+}
+
+int verify_tester(int j, int s, int token) {
+  int to_test = -1;
+  // verifica se o processo (token) é o primeiro sem falha no cluster do
+  // processo j
+  int first = FFneighbor(j, s, token);
+  if (first == token) {
+    to_test = j;
+  }
+
   return to_test;
 }
 
@@ -151,7 +270,8 @@ void count_event_discovery(int N, int token, int token2, int state) {
     }
     if (diag) {
       printf("--> Diagnostico do evento %d completo [# testes = %d, latência = "
-             "%d]\n", event->id, event->n_tests, event->latency);
+             "%d]\n",
+             event->id, event->n_tests, event->latency);
       event->diag = true;
       event->latency = sim_round - event->e_round;
     }
