@@ -28,7 +28,6 @@ typedef struct {
   int id;      // identificador de facility do SMPL
   int *state;  // vetor de estados de cada processo
   bool tested; // se o processo testou na rodada atual
-  int cluster; // cluster a ser testado
 } ProcessType;
 
 // Vetor de processos da simulacao
@@ -131,8 +130,9 @@ void delay_event(int type, int token);
  * @param nodes vetor de processos do cluster
  * @param cluster index do cluster
  * @param size tamanho do vetor de processos do cluster
+ * @param s indice do cluster
  */
-void print_cluster(int nodes[], int cluster, int size);
+void print_cluster(int nodes[], int cluster, int size, int s);
 
 /**
  * Imprime o vetor de estados de um processo especifico
@@ -185,5 +185,12 @@ void create_event(int N, int type, int token);
  * @param N numero total de processos
  */
 void init_process(int N);
+
+/**
+ * Agenda os eventos que ocorrerao durante a simulacao
+ * @param token processo principal
+ * @param j processo a ser conferido estado
+ */
+bool is_correct(int token, int j);
 
 #endif

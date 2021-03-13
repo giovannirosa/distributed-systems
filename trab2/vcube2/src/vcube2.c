@@ -312,10 +312,10 @@ void count_event_discovery(int N, int token, int token2, int state) {
       }
     }
     if (diag) {
-      printf("--> Diagnostico do evento %d completo [# testes = %d, latência = "
-             "%d]\n", event->id, event->n_tests, event->latency);
       event->diag = true;
       event->latency = sim_round - event->e_round;
+      printf("--> Diagnostico do evento %d completo [# testes = %d, latência = "
+             "%d]\n", event->id, event->n_tests, event->latency);
     }
   }
 }

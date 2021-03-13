@@ -42,57 +42,58 @@ bool test(int token, int N, int logN) {
   print_state(N, token, 0);
 
   // calcula os processos do cluster a ser testado
-  node_set *nodes = cis(token, process[token].cluster);
-  print_cluster(nodes->nodes, token, nodes->size);
+  for (int s = 1; s <= logN; ++s) {
+    node_set *nodes = cis(token, s);
+    print_cluster(nodes->nodes, token, nodes->size, s);
 
-  bool tested = false;
-  // verifica processos do cluster
-  for (int j = 0; j < nodes->size; ++j) {
-    // tratamento para numero ímpar de processos
-    if (nodes->nodes[j] >= N) {
-      continue;
-    }
+    bool tested = false;
+    // verifica processos do cluster
+    for (int j = 0; j < nodes->size; ++j) {
+      // tratamento para numero ímpar de processos
+      if (nodes->nodes[j] >= N) {
+        continue;
+      }
 
-    // verifica se é testador do processo j no cluster
-    int token2 = verify_tester(nodes->nodes[j], process[token].cluster, token);
-    if (token2 != -1) {
-      tested = true;
+      // verifica se é testador do processo j no cluster
+      int token2 = verify_tester(nodes->nodes[j], s, token);
+      if (token2 != -1) {
+        tested = true;
 
-      // verifica estado do processo
-      int t = status(process[token2].id);
-      printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
-             token2, time(), t % 2 == 0 ? "correto" : "falho");
+        // verifica estado do processo
+        int t = status(process[token2].id);
+        printf("Processo %d testou processo %d no tempo %4.1f: %s\n", token,
+               token2, time(), t % 2 == 0 ? "correto" : "falho");
 
-      // se estado mudou, atualiza vetor de estados
-      if ((t == 0 && process[token].state[token2] % 2 != 0) ||
-          (t == 1 && process[token].state[token2] % 2 != 1)) {
-        if (process[token].state[token2] == -1) {
-          process[token].state[token2] = t;
-        } else {
-          ++process[token].state[token2];
+        // se estado mudou, atualiza vetor de estados
+        if ((t == 0 && process[token].state[token2] % 2 != 0) ||
+            (t == 1 && process[token].state[token2] % 2 != 1)) {
+          if (process[token].state[token2] == -1) {
+            process[token].state[token2] = t;
+          } else {
+            ++process[token].state[token2];
+          }
+          printf("State[%d] atualizado para %d\n", token2,
+                 process[token].state[token2]);
+          // incrementa # testes do evento
+          count_event_test(N, token, token2);
+          // analisa descoberta do evento para definir diagnostico
+          count_event_discovery(N, token, token2, process[token].state[token2]);
         }
-        printf("State[%d] atualizado para %d\n", token2,
-               process[token].state[token2]);
-        // incrementa # testes do evento
-        count_event_test(N, token, token2);
-        // analisa descoberta do evento para definir diagnostico
-        count_event_discovery(N, token, token2, process[token].state[token2]);
-      }
 
-      // se par esta sem falha, verifica novidades
-      if (t % 2 == 0) {
-        check_state(N, token, token2);
+        // se par esta sem falha, verifica novidades
+        if (t % 2 == 0) {
+          check_state(N, token, token2);
+        }
       }
     }
+    if (!tested) {
+      puts("Nenhum processo testado");
+    }
+    set_free(nodes); // libera memoria
   }
-  if (!tested) {
-    puts("Nenhum processo testado");
-  }
-  set_free(nodes);              // libera memoria
   schedule(TEST, 30.0, token);  // agenda proximo teste
   print_state(N, token, 1);     // imprime vetor de estados
   process[token].tested = true; // teste concluido na rodada
-  count_cluster(token, logN);   // calcula proximo cluster
   printf("==========================================\n");
   return true;
 }
@@ -172,14 +173,6 @@ int verify_tester(int j, int s, int token) {
   return to_test;
 }
 
-void count_cluster(int token, int logN) {
-  if (process[token].cluster == logN) {
-    process[token].cluster = 1;
-  } else {
-    ++process[token].cluster;
-  }
-}
-
 void count_round(int N, int logN) {
   bool all_tested = true;
   // verifica se todos os processos ja testaram na rodada
@@ -208,8 +201,8 @@ void delay_event(int type, int token) {
   schedule(type, 30.0, token);
 }
 
-void print_cluster(int nodes[], int token, int size) {
-  printf("Verificando cluster %d: [", process[token].cluster);
+void print_cluster(int nodes[], int token, int size, int s) {
+  printf("Verificando cluster %d: [", s);
   for (int i = 0; i < size; ++i) {
     printf("%i", nodes[i]);
     if (i != size - 1) {
@@ -318,7 +311,6 @@ void create_event(int N, int type, int token) {
         break;
       process[token].state[i] = -1;
     }
-    process[token].cluster = 1;
   }
 
   // atualiza o proprio state, apenas para controle do diagnostico, esse valor
@@ -339,6 +331,9 @@ void init_process(int N) {
       process[i].state[j] = i == j ? 0 : -1;
     }
     process[i].tested = true;
-    process[i].cluster = 1;
   }
+}
+
+bool is_correct(int token, int j) {
+  process[token].state[j] % 2 == 0;
 }

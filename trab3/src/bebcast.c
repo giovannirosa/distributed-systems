@@ -31,11 +31,8 @@ toda esta situacao no seu log!
 int main(int argc, char *argv[]) {
   static int N,        // numero de processos
       N_faults,        // numero de falhas
-      source,          // fonte do broadcast
       token,           // processo que esta executando
       e, r, t, token2; // variaveis auxiliares
-
-  char *faults; // lista de falhas
 
   const char *t_result;
 
@@ -45,7 +42,7 @@ int main(int argc, char *argv[]) {
   event_array = init_array();
 
   // processa entradas do usuario
-  user_input(&source, &N, &N_faults, faults, argc, argv);
+  user_input(&N, &N_faults, argc, argv);
 
   smpl(0, "Simulacao do Trabalho Pratico 3");
   reset();
@@ -68,36 +65,41 @@ int main(int argc, char *argv[]) {
   // calcula valor de logN
   int logN = ceil(log2(N));
 
-  printf("FFneighbor(0,1) = %d, FFneighbor(0,2) = %d, FFneighbor(0,3) = %d\n", FFneighbor(0,1,0), FFneighbor(0,2,0), FFneighbor(0,3,0));
-  printf("FFneighbor(1,1) = %d, FFneighbor(1,2) = %d, FFneighbor(1,3) = %d\n", FFneighbor(1,1,1), FFneighbor(1,2,1), FFneighbor(1,3,1));
-  printf("FFneighbor(3,1) = %d, FFneighbor(3,2) = %d, FFneighbor(3,3) = %d\n", FFneighbor(3,1,3), FFneighbor(3,2,3), FFneighbor(3,3,3));
-  printf("FFneighbor(6,1) = %d, FFneighbor(6,2) = %d, FFneighbor(6,3) = %d\n", FFneighbor(6,1,6), FFneighbor(6,2,6), FFneighbor(6,3,6));
-  printf("FFneighbor(7,1) = %d, FFneighbor(7,2) = %d, FFneighbor(7,3) = %d\n", FFneighbor(7,1,7), FFneighbor(7,2,7), FFneighbor(7,3,7));
+  // printf("FFneighbor(0,1) = %d, FFneighbor(0,2) = %d, FFneighbor(0,3) =
+  // %d\n", FFneighbor(0,1,0), FFneighbor(0,2,0), FFneighbor(0,3,0));
+  // printf("FFneighbor(1,1) = %d, FFneighbor(1,2) = %d, FFneighbor(1,3) =
+  // %d\n", FFneighbor(1,1,1), FFneighbor(1,2,1), FFneighbor(1,3,1));
+  // printf("FFneighbor(3,1) = %d, FFneighbor(3,2) = %d, FFneighbor(3,3) =
+  // %d\n", FFneighbor(3,1,3), FFneighbor(3,2,3), FFneighbor(3,3,3));
+  // printf("FFneighbor(6,1) = %d, FFneighbor(6,2) = %d, FFneighbor(6,3) =
+  // %d\n", FFneighbor(6,1,6), FFneighbor(6,2,6), FFneighbor(6,3,6));
+  // printf("FFneighbor(7,1) = %d, FFneighbor(7,2) = %d, FFneighbor(7,3) =
+  // %d\n", FFneighbor(7,1,7), FFneighbor(7,2,7), FFneighbor(7,3,7));
 
-  // // loop principal do simulador
-  // while (time() < MAX_TIME) {
-  //   cause(&e, &token);
-  //   // verifica novo round
-  //   count_round(N, logN);
-  //   // verifica se um evento foi agendado para processo inexistente
-  //   if (token > N - 1) {
-  //     printf("Um evento foi agendado para o processo %d, mas o maximo de "
-  //            "processos e de %d!\n",
-  //            token, N);
-  //     exit(1);
-  //   }
-  //   switch (e) {
-  //   case TEST:
-  //     test(token, N, logN);
-  //     break;
-  //   case FAULT:
-  //     failure(token, N);
-  //     break;
-  //   case RECOVERY:
-  //     recovery(token, N);
-  //     break;
-  //   }
-  // }
+  // loop principal do simulador
+  while (time() < MAX_TIME) {
+    cause(&e, &token);
+    // verifica novo round
+    count_round(N, logN);
+    // verifica se um evento foi agendado para processo inexistente
+    if (token > N - 1) {
+      printf("Um evento foi agendado para o processo %d, mas o maximo de "
+             "processos e de %d!\n",
+             token, N);
+      exit(1);
+    }
+    switch (e) {
+    case TEST:
+      test(token, N, logN);
+      break;
+    case FAULT:
+      failure(token, N);
+      break;
+    case RECOVERY:
+      recovery(token, N);
+      break;
+    }
+  }
 
   puts("\n******************************************");
   puts("Simulacao encerrada");
@@ -118,29 +120,68 @@ int main(int argc, char *argv[]) {
   puts("==========================================");
 }
 
-void user_input(int *source, int *N, int *N_faults, char *faults, int argc,
-                char *argv[]) {
+void bebcast(int token, char *msg, int logN) {
+  // apenas um bebcast por vez
+  if (!is_delivered(token)) {
+    deliver(token);
+    for (int s = 1; s <= logN; ++s) {
+      int first = FFneighbor(token, s, token);
+      send(s, first);
+      difusion[token].pendingACK[first] = true;
+    }
+  }
+}
+
+void send(int s, int first) {
+  difusion[first].s = s;
+  schedule(RECEIVE_MSG, 10.0, first);
+}
+
+void receive_msg(int token) {
+  if (!is_delivered(token)) {
+    deliver(token);
+  }
+  if (is_correct(token, source) && is_correct(token, difusion[token].sender)) {
+    int s = difusion[token].s;
+    do {
+      int first = FFneighbor(token, s, token);
+      send(s, first);
+      difusion[token].pendingACK[first] = true;
+    } while (--s != 0);
+  }
+}
+
+void receive_ACK(int token, int j) { difusion[token].pendingACK[j] = false; }
+
+bool is_delivered(int token) { return difusion[token].delivered; }
+
+bool is_pendingACK(int token, int j) { return difusion[token].pendingACK[j]; }
+
+bool deliver(int token) {
+  difusion[token].delivered = true;
+  printf("Mensagem entregue pelo processo %d\n", token);
+}
+
+void user_input(int *N, int *N_faults, int argc, char *argv[]) {
   if (argc != 3 && argc != 4) {
     puts("Uso correto: bebcast <fonte do broadcast> <numero de processos> "
          "<lista de falhas opcional (#,#:#)>");
     exit(1);
   }
 
-  *source = atoi(argv[1]);
+  source = atoi(argv[1]);
   *N = atoi(argv[2]);
   if (argc == 4) {
-    faults = argv[3];
-    printf("source = %i, N = %i, faults = %s\n", *source, *N, faults);
-    build_faults(faults, *N, N_faults);
+    printf("source = %i, N = %i, faults = %s\n", source, *N, argv[3]);
+    build_faults(argv[3], *N, N_faults);
   } else {
-    printf("source = %i, N = %i\n", *source, *N);
+    printf("source = %i, N = %i\n", source, *N);
   }
 
-  if (*source >= *N) {
+  if (source >= *N) {
     printf("O processo fonte %d (F) deve estar dentro do numero de processos "
-           "%d (N)! "
-           "[F < N]\n",
-           *source, *N);
+           "%d (N)! [F < N]\n",
+           source, *N);
     exit(1);
   } else if (*N < 2) {
     printf("O numero minimo de processos e 2!\n");
@@ -228,6 +269,7 @@ void schedule_events(int N, int N_faults) {
       }
     } else {
       schedule(FAULT, init, fault[i].id);
+      init += 30;
     }
   }
 
