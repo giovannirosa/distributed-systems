@@ -11,9 +11,11 @@ Declaracao do programa VCube (versao 2)
 #include "../../lib/vcube2.h"
 #include <regex.h>
 
+// Tempo maximo de simulacao
+#define MAX_TIME 300
+
 // Evento de recebimento de mensagem
 #define RECEIVE_MSG 4
-
 // Evento de recebimento de ACK
 #define RECEIVE_ACK 5
 
@@ -41,27 +43,32 @@ typedef struct {
 // Vetor de processos da simulacao
 ProcessDifusion *difusion;
 
-/**
- * Inicializa processos para a difusao
- * @param N numero total de processos
- */
-void init_difusion(int N);
+void bebcast(int source, int logN);
 
-void bebcast(int token, char *msg);
+void send_msg(int sender, int s, int receiver);
 
-bool is_delivered(int token, char *msg);
+void send_ACK(int sender, int receiver);
+
+void receive_msg(int token);
+
+void receive_ACK(int token, int N);
+
+bool is_delivered(int token);
+
+bool is_pendingACK(int token, int j);
+
+bool any_pending(int token, int N);
+
+void deliver(int token);
 
 /**
  * Processa a entrada do usuario
- * @param source fonte dp broadcast
  * @param N numero total de processos
  * @param N_faults numero total de falhas
- * @param faults lista de falhas
  * @param argc quantidade de argumentos
  * @param argv vetor de argumentos
  */
-void user_input(int *source, int *N, int *N_faults, char *faults, int argc,
-                char *argv[]);
+void user_input(int *N, int *N_faults, int argc, char *argv[]);
 
 /**
  * Constroi as falhas a partir da entrada
@@ -84,6 +91,12 @@ int occurrences(char *str, char del);
  * @param N_faults numero total de falhas
  */
 void schedule_events(int N, int N_faults);
+
+/**
+ * Inicializa processos para a difusao
+ * @param N numero total de processos
+ */
+void init_difusion(int N);
 
 /**
  * Retorna se determinado processo inicia falho

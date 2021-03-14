@@ -20,9 +20,6 @@ Declaracao do programa VCube (versao 2)
 // Evento de recuperacao
 #define RECOVERY 3
 
-// Tempo maximo de simulacao
-#define MAX_TIME 220
-
 // Descritor do processo
 typedef struct {
   int id;      // identificador de facility do SMPL

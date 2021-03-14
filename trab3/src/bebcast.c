@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
 
   // inicializa processos
   init_process(N);
+  init_difusion(N);
 
   // Use current time as seed for random generator
   // double seed = 123;
@@ -76,6 +77,8 @@ int main(int argc, char *argv[]) {
   // printf("FFneighbor(7,1) = %d, FFneighbor(7,2) = %d, FFneighbor(7,3) =
   // %d\n", FFneighbor(7,1,7), FFneighbor(7,2,7), FFneighbor(7,3,7));
 
+  bebcast(source,logN);
+
   // loop principal do simulador
   while (time() < MAX_TIME) {
     cause(&e, &token);
@@ -97,6 +100,12 @@ int main(int argc, char *argv[]) {
       break;
     case RECOVERY:
       recovery(token, N);
+      break;
+    case RECEIVE_MSG:
+      receive_msg(token);
+      break;
+    case RECEIVE_ACK:
+      receive_ACK(token, N);
       break;
     }
   }
@@ -120,21 +129,29 @@ int main(int argc, char *argv[]) {
   puts("==========================================");
 }
 
-void bebcast(int token, char *msg, int logN) {
+void bebcast(int source, int logN) {
   // apenas um bebcast por vez
-  if (!is_delivered(token)) {
-    deliver(token);
+  if (!is_delivered(source)) {
+    deliver(source);
     for (int s = 1; s <= logN; ++s) {
-      int first = FFneighbor(token, s, token);
-      send(s, first);
-      difusion[token].pendingACK[first] = true;
+      int first = FFneighbor(source, s, source);
+      send_msg(source, s, first);
+      difusion[source].pendingACK[first] = true;
     }
   }
 }
 
-void send(int s, int first) {
-  difusion[first].s = s;
-  schedule(RECEIVE_MSG, 10.0, first);
+void send_msg(int sender, int s, int receiver) {
+  difusion[receiver].s = s;
+  difusion[receiver].sender = sender;
+  printf("Mensagem enviada do processo %d para o processo %d\n", sender, receiver);
+  schedule(RECEIVE_MSG, 10.0, receiver);
+}
+
+void send_ACK(int sender, int receiver) {
+  difusion[receiver].sender = sender;
+  printf("Mensagem enviada do processo %d para o processo %d\n", sender, receiver);
+  schedule(RECEIVE_ACK, 10.0, receiver);
 }
 
 void receive_msg(int token) {
@@ -142,22 +159,39 @@ void receive_msg(int token) {
     deliver(token);
   }
   if (is_correct(token, source) && is_correct(token, difusion[token].sender)) {
+    printf("Mensagem recebida pelo processo %d do processo %d com cluster %d\n", token, difusion[token].sender, difusion[token].s);
+    send_ACK(token, difusion[token].sender);
     int s = difusion[token].s;
-    do {
+    while (--s != 0) {
       int first = FFneighbor(token, s, token);
-      send(s, first);
+      send_msg(token, s, first);
       difusion[token].pendingACK[first] = true;
-    } while (--s != 0);
+    }
   }
 }
 
-void receive_ACK(int token, int j) { difusion[token].pendingACK[j] = false; }
+void receive_ACK(int token, int N) {
+  printf("ACK recebido pelo processo %d do processo %d\n", token, difusion[token].sender);
+  difusion[token].pendingACK[difusion[token].sender] = false;
+  if (difusion[token].sender != -1 && !any_pending(token, N)) {
+    send_ACK(token, difusion[token].sender);
+  }
+}
 
 bool is_delivered(int token) { return difusion[token].delivered; }
 
 bool is_pendingACK(int token, int j) { return difusion[token].pendingACK[j]; }
 
-bool deliver(int token) {
+bool any_pending(int token, int N) {
+  for (int i = 0; i < N; ++i) {
+    if (difusion[token].pendingACK[i]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void deliver(int token) {
   difusion[token].delivered = true;
   printf("Mensagem entregue pelo processo %d\n", token);
 }
@@ -186,7 +220,7 @@ void user_input(int *N, int *N_faults, int argc, char *argv[]) {
   } else if (*N < 2) {
     printf("O numero minimo de processos e 2!\n");
     exit(1);
-  } else if (fault == NULL) {
+  } else if (argc == 4 && fault == NULL) {
     printf("A lista de falhas deve seguir o formato: <processo>:<tempo da "
            "falha opcional>\n\t\t\t\tex.: 0:30,2:60,5,7:120\n");
     exit(1);
@@ -253,7 +287,7 @@ void schedule_events(int N, int N_faults) {
   for (int i = 0; i < N; ++i) {
     schedule(TEST, 30.0, i);
   }
-  for (int i = 0; i < N_faults; i++) {
+  for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; ++j) {
       process[i].state[j] = 0;
     }
@@ -291,6 +325,22 @@ void schedule_events(int N, int N_faults) {
   // schedule(RECOVERY, 130.0, 7);
   // schedule(RECOVERY, 170.0, 1);
   // schedule(RECOVERY, 240.0, 2);
+}
+
+void init_difusion(int N) {
+  static char fa_name[5];
+
+  difusion = (ProcessDifusion *)malloc(sizeof(ProcessDifusion) * N);
+  for (int i = 0; i < N; ++i) {
+    difusion[i].id = i;
+    difusion[i].sender = -1;
+    difusion[i].s = -1;
+    difusion[i].delivered = false;
+    difusion[i].pendingACK = malloc(sizeof(bool) * N);
+    for (int j = 0; j < N; ++j) {
+      difusion[i].pendingACK[j] = i == j ? 0 : -1;
+    }
+  }
 }
 
 bool search_fault_failed(int p, int N_faults) {
