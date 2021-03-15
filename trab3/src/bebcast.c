@@ -66,18 +66,7 @@ int main(int argc, char *argv[]) {
   // calcula valor de logN
   int logN = ceil(log2(N));
 
-  // printf("FFneighbor(0,1) = %d, FFneighbor(0,2) = %d, FFneighbor(0,3) =
-  // %d\n", FFneighbor(0,1,0), FFneighbor(0,2,0), FFneighbor(0,3,0));
-  // printf("FFneighbor(1,1) = %d, FFneighbor(1,2) = %d, FFneighbor(1,3) =
-  // %d\n", FFneighbor(1,1,1), FFneighbor(1,2,1), FFneighbor(1,3,1));
-  // printf("FFneighbor(3,1) = %d, FFneighbor(3,2) = %d, FFneighbor(3,3) =
-  // %d\n", FFneighbor(3,1,3), FFneighbor(3,2,3), FFneighbor(3,3,3));
-  // printf("FFneighbor(6,1) = %d, FFneighbor(6,2) = %d, FFneighbor(6,3) =
-  // %d\n", FFneighbor(6,1,6), FFneighbor(6,2,6), FFneighbor(6,3,6));
-  // printf("FFneighbor(7,1) = %d, FFneighbor(7,2) = %d, FFneighbor(7,3) =
-  // %d\n", FFneighbor(7,1,7), FFneighbor(7,2,7), FFneighbor(7,3,7));
-
-  bebcast(source,logN);
+  bebcast(source, logN);
 
   // loop principal do simulador
   while (time() < MAX_TIME) {
@@ -91,18 +80,38 @@ int main(int argc, char *argv[]) {
              token, N);
       exit(1);
     }
+    puts("\n==========================================");
+    const char *exec = "TEST";
+    switch (e) {
+    case FAULT:
+      exec = "FAULT";
+      break;
+    case RECOVERY:
+      exec = "RECOVERY";
+      break;
+    case RECEIVE_MSG:
+      exec = "RECEIVE_MSG";
+      break;
+    case RECEIVE_ACK:
+      exec = "RECEIVE_ACK";
+      break;
+    }
+    printf("Executando processo %d no tempo %.0lf [%s]\n", token, time(), exec);
     switch (e) {
     case TEST:
       test(token, N, logN);
+      resend_failed(token, N, logN);
       break;
     case FAULT:
+      printf("Processo %d falhou\n", token);
       failure(token, N);
+      reset_pending(token, N);
       break;
     case RECOVERY:
       recovery(token, N);
       break;
     case RECEIVE_MSG:
-      receive_msg(token);
+      receive_msg(token, N);
       break;
     case RECEIVE_ACK:
       receive_ACK(token, N);
@@ -129,52 +138,109 @@ int main(int argc, char *argv[]) {
   puts("==========================================");
 }
 
+void calc_send(int token, int s) {
+  int first = FFneighbor(token, s, token);
+  if (first != -1) {
+    send_msg(token, s, first);
+    difusion[token].pendingACK[first] = true;
+  } else {
+    printf("Nao existem processos corretos no cluster %d do processo %d\n", s,
+           token);
+  }
+}
+
 void bebcast(int source, int logN) {
   // apenas um bebcast por vez
   if (!is_delivered(source)) {
+    puts("\n******************************************");
+    printf("Iniciando broadcast com origem %d\n", source);
     deliver(source);
     for (int s = 1; s <= logN; ++s) {
-      int first = FFneighbor(source, s, source);
-      send_msg(source, s, first);
-      difusion[source].pendingACK[first] = true;
+      calc_send(source, s);
     }
   }
 }
 
 void send_msg(int sender, int s, int receiver) {
-  difusion[receiver].s = s;
-  difusion[receiver].sender = sender;
-  printf("Mensagem enviada do processo %d para o processo %d\n", sender, receiver);
-  schedule(RECEIVE_MSG, 10.0, receiver);
+  ProcessMessage *msg = (ProcessMessage *)malloc(sizeof(ProcessMessage));
+  msg->type = 0;
+  msg->s = s;
+  msg->sender = sender;
+  insert_array(difusion[receiver].messages, msg);
+  printf("Mensagem enviada do processo %d para o processo %d\n", sender,
+         receiver);
+  schedule(RECEIVE_MSG, LATENCY, receiver);
 }
 
 void send_ACK(int sender, int receiver) {
-  difusion[receiver].sender = sender;
-  printf("Mensagem enviada do processo %d para o processo %d\n", sender, receiver);
-  schedule(RECEIVE_ACK, 10.0, receiver);
+  ProcessMessage *msg = (ProcessMessage *)malloc(sizeof(ProcessMessage));
+  msg->type = 1;
+  msg->s = -1;
+  msg->sender = sender;
+  insert_array(difusion[receiver].messages, msg);
+  printf("ACK enviado do processo %d para o processo %d\n", sender, receiver);
+  schedule(RECEIVE_ACK, LATENCY, receiver);
 }
 
-void receive_msg(int token) {
+ProcessMessage *retrieve_msg(int token) {
+  Node node = difusion[token].messages->ini;
+  ProcessMessage *msg = node->cont;
+  remove_array_spec(difusion[token].messages, node);
+  return msg;
+}
+
+void receive_msg(int token, int N) {
   if (!is_delivered(token)) {
     deliver(token);
   }
-  if (is_correct(token, source) && is_correct(token, difusion[token].sender)) {
-    printf("Mensagem recebida pelo processo %d do processo %d com cluster %d\n", token, difusion[token].sender, difusion[token].s);
-    send_ACK(token, difusion[token].sender);
-    int s = difusion[token].s;
+  // Consome primeira mensagem na lista, que foi incluida primeiro
+  ProcessMessage *msg = retrieve_msg(token);
+  if (is_correct(token, source) && is_correct(token, msg->sender)) {
+    printf("Mensagem recebida pelo processo %d do processo %d com cluster %d\n",
+           token, msg->sender, msg->s);
+    int s = msg->s;
     while (--s != 0) {
-      int first = FFneighbor(token, s, token);
-      send_msg(token, s, first);
-      difusion[token].pendingACK[first] = true;
+      // printf("processo %d, cluster %d\n", token, s);
+      calc_send(token, s);
+    }
+    if (msg->sender != -1 && !any_pending(token, N)) {
+      send_ACK(token, msg->sender);
     }
   }
 }
 
 void receive_ACK(int token, int N) {
-  printf("ACK recebido pelo processo %d do processo %d\n", token, difusion[token].sender);
-  difusion[token].pendingACK[difusion[token].sender] = false;
-  if (difusion[token].sender != -1 && !any_pending(token, N)) {
-    send_ACK(token, difusion[token].sender);
+  // Consome primeira mensagem na lista, que foi incluida primeiro
+  ProcessMessage *msg = retrieve_msg(token);
+  printf("ACK recebido pelo processo %d do processo %d\n", token, msg->sender);
+  difusion[token].pendingACK[msg->sender] = false;
+  if (msg->sender != -1) {
+    for (int i = 0; i < N; ++i) {
+      if (difusion[i].pendingACK[token]) {
+        send_ACK(token, i);
+      }
+    }
+  }
+  if (token == source && !any_pending(token, N)) {
+    printf("Ultimo ACK recebido! Transmissao completa!\n");
+  }
+  print_pending(N, token);
+}
+
+void reset_pending(int token, int N) {
+  for (int i = 0; i < N; ++i) {
+    difusion[token].pendingACK[i] = false;
+  }
+}
+
+void resend_failed(int token, int N, int logN) {
+  for (int i = 0; i < N; ++i) {
+    if (!is_correct(token, i) && difusion[token].pendingACK[i]) {
+      printf("%d falhou e o processo %d vai reenviar a mensagem\n", i, token);
+      difusion[token].pendingACK[i] = false;
+      int s = cluster(i, token, logN);
+      calc_send(token, s);
+    }
   }
 }
 
@@ -285,7 +351,7 @@ int occurrences(char *str, char del) {
 void schedule_events(int N, int N_faults) {
   // escalonamento inicial
   for (int i = 0; i < N; ++i) {
-    schedule(TEST, 30.0, i);
+    schedule(TEST, LATENCY, i);
   }
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; ++j) {
@@ -293,7 +359,7 @@ void schedule_events(int N, int N_faults) {
     }
   }
 
-  int init = 60;
+  int init = LATENCY * 2;
   for (int i = 0; i < N_faults; i++) {
     printf("id = %d, failed = %s\n", fault[i].id,
            fault[i].failed ? "true" : "false");
@@ -303,7 +369,7 @@ void schedule_events(int N, int N_faults) {
       }
     } else {
       schedule(FAULT, init, fault[i].id);
-      init += 30;
+      init += LATENCY;
     }
   }
 
@@ -333,12 +399,11 @@ void init_difusion(int N) {
   difusion = (ProcessDifusion *)malloc(sizeof(ProcessDifusion) * N);
   for (int i = 0; i < N; ++i) {
     difusion[i].id = i;
-    difusion[i].sender = -1;
-    difusion[i].s = -1;
+    difusion[i].messages = init_array();
     difusion[i].delivered = false;
     difusion[i].pendingACK = malloc(sizeof(bool) * N);
     for (int j = 0; j < N; ++j) {
-      difusion[i].pendingACK[j] = i == j ? 0 : -1;
+      difusion[i].pendingACK[j] = false;
     }
   }
 }
@@ -354,4 +419,15 @@ bool search_fault_failed(int p, int N_faults) {
 
 int gen_rand(int upper, int lower) {
   return (rand() % (upper - lower + 1)) + lower;
+}
+
+void print_pending(int N, int token) {
+  printf("Pending do processo %d: [", token);
+  for (int i = 0; i < N; ++i) {
+    printf("%d", difusion[token].pendingACK[i]);
+    if (i != N - 1) {
+      printf(", ");
+    }
+  }
+  puts("]");
 }

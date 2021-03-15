@@ -13,6 +13,9 @@ Declaracao do programa VCube (versao 2)
 #include "./smpl.h"
 #include <stdbool.h>
 
+// Imprime logs de teste
+#define PRINT 0
+
 // Evento de teste
 #define TEST 1
 // Evento de falha

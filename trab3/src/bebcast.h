@@ -11,13 +11,20 @@ Declaracao do programa VCube (versao 2)
 #include "../../lib/vcube2.h"
 #include <regex.h>
 
+// CONSTANTES ========================================
+
 // Tempo maximo de simulacao
 #define MAX_TIME 300
+
+// Latencia entre as mensagens
+#define LATENCY 30
 
 // Evento de recebimento de mensagem
 #define RECEIVE_MSG 4
 // Evento de recebimento de ACK
 #define RECEIVE_ACK 5
+
+// ESTRUTURA DE DADOS ================================
 
 // Descritor da lista de falhas
 typedef struct {
@@ -25,41 +32,112 @@ typedef struct {
   bool failed; // inicialmente falho
 } Fault;
 
-// Vetor de processos da simulacao
-Fault *fault;
-
-// Indica origem do broadcast
-int source;
+// Descritor da mensagem
+typedef struct {
+  int type;   // tipo da mensagem: 0 = msg, 1 = ack
+  int sender; // processo que enviou a mensagem
+  int s;      // indice do cluster da mensagem
+} ProcessMessage;
 
 // Descritor da difusao do processo
 typedef struct {
   int id;           // identificador de facility do SMPL
-  int sender;       // processo que enviou a mensagem
-  int s;            // indice do cluster da mensagem
+  Array messages;   // lista de mensagens destinadas
   bool delivered;   // indica se mensagem foi entregue
   bool *pendingACK; // lista de acks pendentes
 } ProcessDifusion;
 
+// VARIAVEIS =========================================
+
+// Vetor de processos da simulacao
+Fault *fault;
+
 // Vetor de processos da simulacao
 ProcessDifusion *difusion;
 
+// Indica origem do broadcast
+int source;
+
+// BROADCAST =========================================
+
+/**
+ * Inicia best-effort broadcast
+ * @param source processo origem do broadcast
+ * @param logN log do numero total de processos
+ */
 void bebcast(int source, int logN);
 
+/**
+ * Envia mensagem
+ * @param sender processo transmissor
+ * @param s cluster a que o receptor pertence no transmissor
+ * @param receiver processo receptor
+ */
 void send_msg(int sender, int s, int receiver);
 
+/**
+ * Envia ACK
+ * @param sender processo transmissor
+ * @param receiver processo receptor
+ */
 void send_ACK(int sender, int receiver);
 
-void receive_msg(int token);
+/**
+ * Recebe mensagem
+ * @param token processo receptor
+ * @param N numero total de processos
+ */
+void receive_msg(int token, int N);
 
+/**
+ * Recebe ACK
+ * @param token processo receptor
+ * @param N numero total de processos
+ */
 void receive_ACK(int token, int N);
 
+/**
+ * Entrega a mensagem para um processo especifico
+ * @param token processo
+ */
+void deliver(int token);
+
+/**
+ * Reenvia mensagem em caso de deteccao de falha
+ * @param token processo
+ * @param N numero total de processos
+ * @param logN log do numero total de processos
+ */
+void resend_failed(int token, int N, int logN);
+
+// AUXILIARES ========================================
+
+/**
+ * Reseta os pendentes de um processo
+ * @param token processo
+ * @param N numero total de processos
+ */
+void reset_pending(int token, int N);
+
+/**
+ * Retorna se existe a mensagem foi entregue para um processo
+ * @param token processo principal
+ */
 bool is_delivered(int token);
 
+/**
+ * Retorna se existe ACK pendente de um processo especifico
+ * @param token processo principal
+ * @param j processo a ser verificado
+ */
 bool is_pendingACK(int token, int j);
 
+/**
+ * Retorna se existe algum ACK pendente de um processo
+ * @param token processo
+ * @param N numero total de processos
+ */
 bool any_pending(int token, int N);
-
-void deliver(int token);
 
 /**
  * Processa a entrada do usuario
@@ -111,5 +189,12 @@ bool search_fault_failed(int p, int N_faults);
  * @param lower numero total de falhas
  */
 int gen_rand(int upper, int lower);
+
+/**
+ * Imprime o vetor de pendentes de um processo especifico
+ * @param N numero total de processos
+ * @param token index do processo
+ */
+void print_pending(int N, int token);
 
 #endif
