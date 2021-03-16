@@ -218,7 +218,7 @@ void receive_ACK(int token, int N) {
   printf("ACK recebido pelo processo %d do processo %d\n", token, msg->sender);
   difusion[token].pendingACK[msg->sender] = false;
   print_pending(N, token);
-  if (msg->sender != -1) {
+  if (!any_pending(token, N)) {
     for (int i = 0; i < N; ++i) {
       if (difusion[i].pendingACK[token]) {
         send_ACK(token, i);

@@ -14,10 +14,10 @@ title: Trabalho Prático 3
 {% endhighlight %}
     <p>O log deste teste pode ser visualizado abaixo:</p>
     <details>
-        <summary style="cursor: pointer;">Log do teste 1 (clique para expandir)</summary>
+        <summary style="cursor: pointer;">› Log do teste 1 (clique para expandir)</summary>
 {% highlight plaintext %}
 Este programa foi executado para N=8 processos
-O tempo maximo de simulacao e de 130
+O tempo maximo de simulacao e de 200
 A latencia entre as mensagens e o intervalo de testes e de 30
 A origem do broadcast e o processo 1
 Os estados inicias de cada processo sao:
@@ -175,8 +175,6 @@ ACK enviado do processo 6 para o processo 7
 Executando processo 5 no tempo 90 [RECEIVE_ACK]
 ACK recebido pelo processo 5 do processo 4
 Pending do processo 5: [0, 0, 0, 0, 0, 0, 0, 1]
-O processo 5 nao possui ACKs pendentes
-ACK enviado do processo 5 para o processo 1
 
 ==========================================
 Executando processo 0 no tempo 120 [TEST]
@@ -215,13 +213,68 @@ O processo 7 nao possui ACKs pendentes
 ACK enviado do processo 7 para o processo 5
 
 ==========================================
-Executando processo 1 no tempo 120 [RECEIVE_ACK]
+Executando processo 0 no tempo 150 [TEST]
+
+==========================================
+Executando processo 1 no tempo 150 [TEST]
+
+==========================================
+Executando processo 2 no tempo 150 [TEST]
+
+==========================================
+Executando processo 3 no tempo 150 [TEST]
+
+==========================================
+Executando processo 4 no tempo 150 [TEST]
+
+==========================================
+Executando processo 5 no tempo 150 [TEST]
+
+==========================================
+Executando processo 6 no tempo 150 [TEST]
+
+==========================================
+Executando processo 7 no tempo 150 [TEST]
+
+==========================================
+Executando processo 5 no tempo 150 [RECEIVE_ACK]
+ACK recebido pelo processo 5 do processo 7
+Pending do processo 5: [0, 0, 0, 0, 0, 0, 0, 0]
+O processo 5 nao possui ACKs pendentes
+ACK enviado do processo 5 para o processo 1
+
+==========================================
+Executando processo 0 no tempo 180 [TEST]
+
+==========================================
+Executando processo 1 no tempo 180 [TEST]
+
+==========================================
+Executando processo 2 no tempo 180 [TEST]
+
+==========================================
+Executando processo 3 no tempo 180 [TEST]
+
+==========================================
+Executando processo 4 no tempo 180 [TEST]
+
+==========================================
+Executando processo 5 no tempo 180 [TEST]
+
+==========================================
+Executando processo 6 no tempo 180 [TEST]
+
+==========================================
+Executando processo 7 no tempo 180 [TEST]
+
+==========================================
+Executando processo 1 no tempo 180 [RECEIVE_ACK]
 ACK recebido pelo processo 1 do processo 5
 Pending do processo 1: [0, 0, 0, 0, 0, 0, 0, 0]
 Ultimo ACK recebido! Transmissao completa!
 
 ==========================================
-Executando processo 0 no tempo 150 [TEST]
+Executando processo 0 no tempo 210 [TEST]
 
 ******************************************
 Simulacao encerrada
