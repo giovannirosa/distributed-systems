@@ -1,0 +1,206 @@
+---
+layout: default
+title: Trabalho Prático 3 - Teste 3
+---
+
+<body>
+    <a href="../../">Voltar</a>
+    <h1>Trabalho Prático 3 - Teste 3</h1>
+    <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 7 e estão falhos 3 e 1. Mostre claramente
+        quais mensagens são transmitidas.</p>
+    <p>O programa foi executado com os seguintes parâmetros:</p>
+{% highlight bash %}
+./bebcast 7 8 3:1,1:1
+{% endhighlight %}
+    <p>A evolução do broadcast ao longo do tempo pode ser visualizado abaixo:</p>
+    <img src="./teste3.png" alt="teste 3">
+    <p>O log deste teste pode ser visualizado abaixo:</p>
+    <details>
+        <summary style="cursor: pointer;">› Log do teste 3 (clique para expandir)</summary>
+{% highlight plaintext %}
+Este programa foi executado para N=8 processos
+O tempo maximo de simulacao e de 130
+A latencia entre as mensagens e o intervalo de testes e de 30
+A origem do broadcast e o processo 7
+Os estados inicias de cada processo sao:
+State do processo 0: [0, 1, 0, 1, 0, 0, 0, 0]
+State do processo 1: [-1, 1, -1, -1, -1, -1, -1, -1]
+State do processo 2: [0, 1, 0, 1, 0, 0, 0, 0]
+State do processo 3: [-1, -1, -1, 1, -1, -1, -1, -1]
+State do processo 4: [0, 1, 0, 1, 0, 0, 0, 0]
+State do processo 5: [0, 1, 0, 1, 0, 0, 0, 0]
+State do processo 6: [0, 1, 0, 1, 0, 0, 0, 0]
+State do processo 7: [0, 1, 0, 1, 0, 0, 0, 0]
+
+******************************************
+
+==========================================
+Executando processo 7 no tempo 0 [BEBCAST]
+Iniciando broadcast com origem 7
+Mensagem entregue pelo processo 7
+Mensagem enviada do processo 7 para o processo 6 com cluster 1
+Mensagem enviada do processo 7 para o processo 5 com cluster 2
+Mensagem enviada do processo 7 para o processo 2 com cluster 3
+
+==========================================
+Executando processo 0 no tempo 30 [TEST]
+
+==========================================
+Executando processo 1 no tempo 30 [TEST]
+
+==========================================
+Executando processo 2 no tempo 30 [TEST]
+
+==========================================
+Executando processo 3 no tempo 30 [TEST]
+
+==========================================
+Executando processo 4 no tempo 30 [TEST]
+
+==========================================
+Executando processo 5 no tempo 30 [TEST]
+
+==========================================
+Executando processo 6 no tempo 30 [TEST]
+
+==========================================
+Executando processo 7 no tempo 30 [TEST]
+
+==========================================
+Executando processo 6 no tempo 30 [RECEIVE_MSG]
+Mensagem recebida pelo processo 6 do processo 7 com cluster 1
+Mensagem entregue pelo processo 6
+O processo 6 nao possui ACKs pendentes
+ACK enviado do processo 6 para o processo 7
+
+==========================================
+Executando processo 5 no tempo 30 [RECEIVE_MSG]
+Mensagem recebida pelo processo 5 do processo 7 com cluster 2
+Mensagem entregue pelo processo 5
+Mensagem enviada do processo 5 para o processo 4 com cluster 1
+
+==========================================
+Executando processo 2 no tempo 30 [RECEIVE_MSG]
+Mensagem recebida pelo processo 2 do processo 7 com cluster 3
+Mensagem entregue pelo processo 2
+Mensagem enviada do processo 2 para o processo 0 com cluster 2
+Nao existem processos corretos no cluster 1 do processo 2
+
+==========================================
+Executando processo 0 no tempo 60 [TEST]
+
+==========================================
+Executando processo 2 no tempo 60 [TEST]
+
+==========================================
+Executando processo 4 no tempo 60 [TEST]
+
+==========================================
+Executando processo 5 no tempo 60 [TEST]
+
+==========================================
+Executando processo 6 no tempo 60 [TEST]
+
+==========================================
+Executando processo 7 no tempo 60 [TEST]
+
+==========================================
+Executando processo 7 no tempo 60 [RECEIVE_ACK]
+ACK recebido pelo processo 7 do processo 6
+Pending do processo 7: [0, 0, 1, 0, 0, 1, 0, 0]
+
+==========================================
+Executando processo 4 no tempo 60 [RECEIVE_MSG]
+Mensagem recebida pelo processo 4 do processo 5 com cluster 1
+Mensagem entregue pelo processo 4
+O processo 4 nao possui ACKs pendentes
+ACK enviado do processo 4 para o processo 5
+
+==========================================
+Executando processo 0 no tempo 60 [RECEIVE_MSG]
+Mensagem recebida pelo processo 0 do processo 2 com cluster 2
+Mensagem entregue pelo processo 0
+Nao existem processos corretos no cluster 1 do processo 0
+O processo 0 nao possui ACKs pendentes
+ACK enviado do processo 0 para o processo 2
+
+==========================================
+Executando processo 0 no tempo 90 [TEST]
+
+==========================================
+Executando processo 2 no tempo 90 [TEST]
+
+==========================================
+Executando processo 4 no tempo 90 [TEST]
+
+==========================================
+Executando processo 5 no tempo 90 [TEST]
+
+==========================================
+Executando processo 6 no tempo 90 [TEST]
+
+==========================================
+Executando processo 7 no tempo 90 [TEST]
+
+==========================================
+Executando processo 5 no tempo 90 [RECEIVE_ACK]
+ACK recebido pelo processo 5 do processo 4
+Pending do processo 5: [0, 0, 0, 0, 0, 0, 0, 0]
+O processo 5 nao possui ACKs pendentes
+ACK enviado do processo 5 para o processo 7
+
+==========================================
+Executando processo 2 no tempo 90 [RECEIVE_ACK]
+ACK recebido pelo processo 2 do processo 0
+Pending do processo 2: [0, 0, 0, 0, 0, 0, 0, 0]
+O processo 2 nao possui ACKs pendentes
+ACK enviado do processo 2 para o processo 7
+
+==========================================
+Executando processo 0 no tempo 120 [TEST]
+
+==========================================
+Executando processo 2 no tempo 120 [TEST]
+
+==========================================
+Executando processo 4 no tempo 120 [TEST]
+
+==========================================
+Executando processo 5 no tempo 120 [TEST]
+
+==========================================
+Executando processo 6 no tempo 120 [TEST]
+
+==========================================
+Executando processo 7 no tempo 120 [TEST]
+
+==========================================
+Executando processo 7 no tempo 120 [RECEIVE_ACK]
+ACK recebido pelo processo 7 do processo 5
+Pending do processo 7: [0, 0, 1, 0, 0, 0, 0, 0]
+
+==========================================
+Executando processo 7 no tempo 120 [RECEIVE_ACK]
+ACK recebido pelo processo 7 do processo 2
+Pending do processo 7: [0, 0, 0, 0, 0, 0, 0, 0]
+Ultimo ACK recebido! Transmissao completa!
+
+==========================================
+Executando processo 0 no tempo 150 [TEST]
+
+******************************************
+Simulacao encerrada
+
+==========================================
+
+Eventos durante a simulacao:
+Event[1]: FALHA | round 0 | tempo 000.0 | processo 3 | numero de testes de 0 | latencia de -1
+Event[2]: FALHA | round 0 | tempo 000.0 | processo 1 | numero de testes de 0 | latencia de -1
+
+==========================================
+Programa finalizado com sucesso
+Autor: Giovanni Rosa :)
+==========================================
+{% endhighlight %}
+    </details>
+</body>

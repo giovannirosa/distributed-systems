@@ -369,7 +369,9 @@ void schedule_events(int N, int N_faults) {
     if (fault[i].failed) {
       failure(fault[i].id, N, true);
       for (int j = 0; j < N; ++j) {
-        process[j].state[fault[i].id] = 1;
+        if (process[j].state[fault[i].id] != -1) {
+          process[j].state[fault[i].id] = 1;
+        }
       }
     } else {
       schedule(FAULT, init, fault[i].id);
