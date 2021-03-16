@@ -19,4 +19,56 @@ title: Trabalho Prático 3
         (antes de receber o ACK) o processo que deveria mandar o ACK falha. Agora o processo que aguardava o ACK deve
         mandar uma nova mensagem para outro processo do cluster do processo que falhou. Deve ser fácil visualizar toda
         esta situação no seu log!</p>
+
+    <h2>Código</h2>
+    <p>Fontes: <a href="./src/bebcast.c">bebcast.c</a> <a href="./src/bebcast.h">bebcast.h</a></p>
+    </p>
+    <p>O código foi escrito a partir do código do <a href="../vcube2/src/vcube2.c">vcube2.c</a> da <a
+            href="../trab2/vcube2/">Versão 2</a> do <a href="../trab2/">Trabalho Prático 2</a>. As seguintes alterações
+        foram
+        realizadas para cumprir os requisitos do Trabalho Prático 2:</p>
+    <ol>
+        <li>Funções auxiliares para a simulação que estão descritas no <a href="./src/bebcast.h">bebcast.h</a></li>
+    </ol>
+    <h2>Execução</h2>
+    <p>Os testes a seguir foram executados para demonstrar a corretude do programa. A rodada 0 indica o estado inicial
+        dos processos. A partir da rodada 1, os estados representados nas imagens representam àqueles dos finais da
+        respectiva rodada. Os símbolos de raio indicam falha, e os de coração representam recuperação.</p>
+    <h3>Testes de Validação</h3>
+    Estes testes foram realizados para verificar as validações do programa para evitar entradas incorretas do usuário:
+    <ol>
+        <li>./vcube2</li>
+        {% highlight plaintext %}
+        Uso correto: vcube2 <numero de processos>
+            {% endhighlight %}
+            <li>./vcube2 1</li>
+            {% highlight plaintext %}
+            O numero minimo de processos e 2!
+            {% endhighlight %}
+            <li>./vcube2 2 - com um evento agendado para um processo maior que 1</li>
+            {% highlight plaintext %}
+            Este programa foi executado para N=2 processos
+            O tempo maximo de simulacao e de 350
+
+            ******************************************
+            Iniciando round de testes 1
+            Um evento foi agendado para o processo 5, mas o maximo de processos e de 2!
+            {% endhighlight %}
+    </ol>
+    <h3 id="teste1">Teste 1</h3>
+    <p>Mostre todas as mensagens transmitidas broadcasts iniciados pelo processo 0 (zero) em sistemas com N = 8, 16 e 32
+        processos, todos corretos (3 cenários sem falhas).</p>
+    <p><a href="./test/test1/">Ir para a página do teste</a></p>
+    <h3 id="teste2">Teste 2</h3>
+    <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 0 e estão falhos 2, 4 e 5. Mostre claramente
+        quais mensagens são transmitidas.</p>
+    <h3 id="teste3">Teste 3</h3>
+    <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 7 e estão falhos 3 e 1. Mostre claramente
+        quais mensagens são transmitidas.</p>
+    <h3 id="teste4">Teste 4</h3>
+    <p>Em um sistema com 16 processos, o broadcast é iniciado pelo processo 0 e estão falhos 2, 8, 9 e 12. Mostre
+        claramente quais mensagens são transmitidas.</p>
+    <h3 id="teste5">Teste 5</h3>
+    <p>Em um sistema com 32 processos, o broadcast é iniciado pelo processo 16 e estão falhos 0, 2, 4 e 8. Mostre
+        claramente quais mensagens são transmitidas.</p>
 </body>

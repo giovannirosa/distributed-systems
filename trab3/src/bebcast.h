@@ -14,7 +14,7 @@ Declaracao do programa VCube (versao 2)
 // CONSTANTES ========================================
 
 // Tempo maximo de simulacao
-#define MAX_TIME 300
+#define MAX_TIME 130
 
 // Latencia entre as mensagens
 #define LATENCY 30

@@ -153,6 +153,8 @@ void bebcast(int source, int logN) {
   // apenas um bebcast por vez
   if (!is_delivered(source)) {
     puts("\n******************************************");
+    puts("\n==========================================");
+    printf("Executando processo %d no tempo 0 [BEBCAST]\n", source);
     printf("Iniciando broadcast com origem %d\n", source);
     deliver(source);
     for (int s = 1; s <= logN; ++s) {
@@ -167,12 +169,13 @@ void send_msg(int sender, int s, int receiver) {
   msg->s = s;
   msg->sender = sender;
   insert_array(difusion[receiver].messages, msg);
-  printf("Mensagem enviada do processo %d para o processo %d\n", sender,
-         receiver);
+  printf("Mensagem enviada do processo %d para o processo %d com cluster %d\n",
+         sender, receiver, s);
   schedule(RECEIVE_MSG, LATENCY, receiver);
 }
 
 void send_ACK(int sender, int receiver) {
+  printf("O processo %d nao possui ACKs pendentes\n", sender);
   ProcessMessage *msg = (ProcessMessage *)malloc(sizeof(ProcessMessage));
   msg->type = 1;
   msg->s = -1;
@@ -190,14 +193,14 @@ ProcessMessage *retrieve_msg(int token) {
 }
 
 void receive_msg(int token, int N) {
+  // Consome primeira mensagem na lista, que foi incluida primeiro
+  ProcessMessage *msg = retrieve_msg(token);
+  printf("Mensagem recebida pelo processo %d do processo %d com cluster %d\n",
+         token, msg->sender, msg->s);
   if (!is_delivered(token)) {
     deliver(token);
   }
-  // Consome primeira mensagem na lista, que foi incluida primeiro
-  ProcessMessage *msg = retrieve_msg(token);
   if (is_correct(token, source) && is_correct(token, msg->sender)) {
-    printf("Mensagem recebida pelo processo %d do processo %d com cluster %d\n",
-           token, msg->sender, msg->s);
     int s = msg->s;
     while (--s != 0) {
       // printf("processo %d, cluster %d\n", token, s);
@@ -214,6 +217,7 @@ void receive_ACK(int token, int N) {
   ProcessMessage *msg = retrieve_msg(token);
   printf("ACK recebido pelo processo %d do processo %d\n", token, msg->sender);
   difusion[token].pendingACK[msg->sender] = false;
+  print_pending(N, token);
   if (msg->sender != -1) {
     for (int i = 0; i < N; ++i) {
       if (difusion[i].pendingACK[token]) {
@@ -224,7 +228,6 @@ void receive_ACK(int token, int N) {
   if (token == source && !any_pending(token, N)) {
     printf("Ultimo ACK recebido! Transmissao completa!\n");
   }
-  print_pending(N, token);
 }
 
 void reset_pending(int token, int N) {
@@ -272,10 +275,7 @@ void user_input(int *N, int *N_faults, int argc, char *argv[]) {
   source = atoi(argv[1]);
   *N = atoi(argv[2]);
   if (argc == 4) {
-    printf("source = %i, N = %i, faults = %s\n", source, *N, argv[3]);
     build_faults(argv[3], *N, N_faults);
-  } else {
-    printf("source = %i, N = %i\n", source, *N);
   }
 
   if (source >= *N) {
@@ -293,6 +293,9 @@ void user_input(int *N, int *N_faults, int argc, char *argv[]) {
   } else {
     printf("Este programa foi executado para N=%d processos\n", *N);
     printf("O tempo maximo de simulacao e de %d\n", MAX_TIME);
+    printf("A latencia entre as mensagens e o intervalo de testes e de %d\n",
+           LATENCY);
+    printf("A origem do broadcast e o processo %d\n", source);
   }
 }
 
@@ -373,6 +376,7 @@ void schedule_events(int N, int N_faults) {
     }
   }
 
+  puts("Os estados inicias de cada processo sao:");
   for (int i = 0; i < N; ++i) {
     print_state(N, i, -1);
   }
