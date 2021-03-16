@@ -1,8 +1,8 @@
 /*
   Autor: Giovanni Rosa
-  Ultima modificao: 31/01/2021
+  Ultima modificao: 15/03/2021
 
-Declaracao do programa VCube (versao 2)
+Declaracao do programa Bebcast
 */
 
 #ifndef BEBCAST_H

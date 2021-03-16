@@ -1,6 +1,6 @@
 /*
   Autor: Giovanni Rosa
-  Ultima modificao: 09/03/2021
+  Ultima modificao: 15/03/2021
 
 Programa dedicado a implementacao do Best-Effort Broadcast sobre o VCube como
 requisito para o Trabalho Pratico 3 da disciplina de Sistemas Distribuidos.
