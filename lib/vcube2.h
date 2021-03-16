@@ -69,8 +69,9 @@ bool test(int token, int N, int logN);
  * Falha o processo
  * @param token processo a falhar
  * @param N numero total de processos
+ * @param ignore_diag ignora a verificacao de diagnostico
  */
-bool failure(int token, int N);
+bool failure(int token, int N, bool ignore_diag);
 
 /**
  * Recupera o processo

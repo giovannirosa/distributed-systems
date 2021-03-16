@@ -108,10 +108,10 @@ bool test(int token, int N, int logN) {
   return true;
 }
 
-bool failure(int token, int N) {
+bool failure(int token, int N, bool ignore_diag) {
   // se o evento anterior nao foi diagnosticado ainda, adia o evento para a
   // proxima rodada
-  if (event != NULL && !event->diag) {
+  if (!ignore_diag && event != NULL && !event->diag) {
     delay_event(FAULT, token);
     return false;
   }

@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
       break;
     case FAULT:
       printf("Processo %d falhou\n", token);
-      failure(token, N);
+      failure(token, N, false);
       reset_pending(token, N);
       break;
     case RECOVERY:
@@ -364,9 +364,10 @@ void schedule_events(int N, int N_faults) {
 
   int init = LATENCY * 2;
   for (int i = 0; i < N_faults; i++) {
-    printf("id = %d, failed = %s\n", fault[i].id,
-           fault[i].failed ? "true" : "false");
+    // printf("id = %d, failed = %s\n", fault[i].id,
+    //        fault[i].failed ? "true" : "false");
     if (fault[i].failed) {
+      failure(fault[i].id, N, true);
       for (int j = 0; j < N; ++j) {
         process[j].state[fault[i].id] = 1;
       }
