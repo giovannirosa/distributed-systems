@@ -33,7 +33,7 @@ title: Trabalho Prático 3
     <h2>Execução</h2>
     <p>O programa deve ser executado seguindo o modelo esperado:</p>
 {% highlight plaintext %}
-./bebcast <fonte do broadcast> <numero de processos> <lista de falhas opcional (#,#:#)></lista>
+./bebcast <fonte do broadcast> <numero de processos> <lista de falhas opcional (#,#:#)>
 {% endhighlight %}
             <p>Qualquer entrada que não siga esse modelo produz saídas inesperadas. Algumas validações foram feitas, mas
                 todos
@@ -46,7 +46,7 @@ title: Trabalho Prático 3
                     <p>A lista de falhas é opcional, e caso seja omitida o programa executará no modo aleatório.</p>
                 </li>
                 <li>
-                    <p>A lista de falhas deve ser <processo>:<0=correto ou 1=falho> separados por vírgula.</p>
+                    <p>A lista de falhas deve ser &lt;processo&gt;:&lt;0=correto ou 1=falho&gt; separados por vírgula.</p>
                     <p>Ex.: ./bebcast 0 4 0:1,1:0,2:0,3:1</p>
                 </li>
             </ul>
