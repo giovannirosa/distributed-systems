@@ -31,48 +31,63 @@ title: Trabalho Prático 3
         <li>Funções auxiliares para a simulação que estão descritas no <a href="./src/bebcast.h">bebcast.h</a></li>
     </ol>
     <h2>Execução</h2>
-    <p>Os testes a seguir foram executados para demonstrar a corretude do programa. A rodada 0 indica o estado inicial
-        dos processos. A partir da rodada 1, os estados representados nas imagens representam àqueles dos finais da
-        respectiva rodada. Os símbolos de raio indicam falha, e os de coração representam recuperação.</p>
-    <h3>Testes de Validação</h3>
-    Estes testes foram realizados para verificar as validações do programa para evitar entradas incorretas do usuário:
-    <ol>
-        <li>./vcube2</li>
-        {% highlight plaintext %}
-        Uso correto: vcube2 <numero de processos>
-            {% endhighlight %}
-            <li>./vcube2 1</li>
-            {% highlight plaintext %}
-            O numero minimo de processos e 2!
-            {% endhighlight %}
-            <li>./vcube2 2 - com um evento agendado para um processo maior que 1</li>
-            {% highlight plaintext %}
-            Este programa foi executado para N=2 processos
-            O tempo maximo de simulacao e de 350
-
-            ******************************************
-            Iniciando round de testes 1
-            Um evento foi agendado para o processo 5, mas o maximo de processos e de 2!
-            {% endhighlight %}
-    </ol>
-    <h3 id="teste1">Teste 1</h3>
-    <p>Mostre todas as mensagens transmitidas broadcasts iniciados pelo processo 0 (zero) em sistemas com N = 8, 16 e 32
-        processos, todos corretos (3 cenários sem falhas).</p>
-    <a href="./test/test1/">Ir para a página do teste 1</a>
-    <h3 id="teste2">Teste 2</h3>
-    <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 0 e estão falhos 2, 4 e 5. Mostre claramente
-        quais mensagens são transmitidas.</p>
-    <a href="./test/test2/">Ir para a página do teste 2</a>
-    <h3 id="teste3">Teste 3</h3>
-    <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 7 e estão falhos 3 e 1. Mostre claramente
-        quais mensagens são transmitidas.</p>
-    <a href="./test/test3/">Ir para a página do teste 3</a>
-    <h3 id="teste4">Teste 4</h3>
-    <p>Em um sistema com 16 processos, o broadcast é iniciado pelo processo 0 e estão falhos 2, 8, 9 e 12. Mostre
-        claramente quais mensagens são transmitidas.</p>
-    <a href="./test/test4/">Ir para a página do teste 4</a>
-    <h3 id="teste5">Teste 5</h3>
-    <p>Em um sistema com 32 processos, o broadcast é iniciado pelo processo 16 e estão falhos 0, 2, 4 e 8. Mostre
-        claramente quais mensagens são transmitidas.</p>
-    <a href="./test/test5/">Ir para a página do teste 5</a>
+    <p>O programa deve ser executado seguindo o modelo esperado:</p>
+{% highlight plaintext %}
+./bebcast <fonte do broadcast> <numero de processos> <lista de falhas opcional (#,#:#)></lista>
+{% endhighlight %}
+            <p>Qualquer entrada que não siga esse modelo produz saídas inesperadas. Algumas validações foram feitas, mas
+                todos
+                os casos possíveis não estão cobertos.</p>
+            <ul>
+                <li>
+                    <p>A fonte do broadcast deve estar dentro do conjunto de processos.</p>
+                </li>
+                <li>
+                    <p>A lista de falhas é opcional, e caso seja omitida o programa executará no modo aleatório.</p>
+                </li>
+                <li>
+                    <p>A lista de falhas deve ser <processo>:<0=correto ou 1=falho> separados por vírgula.</p>
+                    <p>Ex.: ./bebcast 0 4 0:1,1:0,2:0,3:1</p>
+                </li>
+            </ul>
+            <p>Os testes a seguir foram executados para demonstrar a corretude do programa. Cada teste está separado em
+                uma página e contém um fluxograma das mensagens feito exclusivamente pela observação do log, que também
+                pode ser visualizado.</p>
+            <h3>Testes de Validação</h3>
+            Estes testes foram realizados para verificar as validações do programa para evitar entradas incorretas do
+            usuário:
+            <ol>
+                <li>./bebcast</li>
+{% highlight plaintext %}
+Uso correto: bebcast <fonte do broadcast> <numero de processos> <lista de falhas opcional (#,#:#)>
+{% endhighlight %}
+                <li>./bebcast 4 4</li>
+{% highlight plaintext %}
+O processo fonte 4 (F) deve estar dentro do numero de processos 4 (N)! [F < N]
+{% endhighlight %}
+                <li>./bebcast 0 4 a:1,2:1</li>
+{% highlight plaintext %}
+A lista de falhas apresenta uma entrada que nao e numero!
+{% endhighlight %}
+            </ol>
+            <h3 id="teste1">Teste 1</h3>
+            <p>Mostre todas as mensagens transmitidas broadcasts iniciados pelo processo 0 (zero) em sistemas com N = 8,
+                16 e 32 processos, todos corretos (3 cenários sem falhas).</p>
+            <a href="./test/test1/">Ir para a página do teste 1</a>
+            <h3 id="teste2">Teste 2</h3>
+            <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 0 e estão falhos 2, 4 e 5. Mostre
+                claramente quais mensagens são transmitidas.</p>
+            <a href="./test/test2/">Ir para a página do teste 2</a>
+            <h3 id="teste3">Teste 3</h3>
+            <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 7 e estão falhos 3 e 1. Mostre
+                claramente quais mensagens são transmitidas.</p>
+            <a href="./test/test3/">Ir para a página do teste 3</a>
+            <h3 id="teste4">Teste 4</h3>
+            <p>Em um sistema com 16 processos, o broadcast é iniciado pelo processo 0 e estão falhos 2, 8, 9 e 12.
+                Mostre claramente quais mensagens são transmitidas.</p>
+            <a href="./test/test4/">Ir para a página do teste 4</a>
+            <h3 id="teste5">Teste 5</h3>
+            <p>Em um sistema com 32 processos, o broadcast é iniciado pelo processo 16 e estão falhos 0, 2, 4 e 8.
+                Mostre claramente quais mensagens são transmitidas.</p>
+            <a href="./test/test5/">Ir para a página do teste 5</a>
 </body>

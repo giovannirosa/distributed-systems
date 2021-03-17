@@ -6,6 +6,7 @@
         "stdbool.h": "c",
         "sstream": "c",
         "algorithm": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "string": "c"
     }
 }

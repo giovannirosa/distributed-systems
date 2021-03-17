@@ -302,7 +302,7 @@ void user_input(int *N, int *N_faults, int argc, char *argv[]) {
 void build_faults(char *faults, int N, int *N_faults) {
   int ent = 0;
   *N_faults = occurrences(faults, ',') + 1;
-  char **semiresult = malloc(sizeof(char *) * *N_faults);
+  char **semiresult = malloc(sizeof(char *) * (*N_faults));
   char *token = strtok(faults, ",");
   while (token != NULL) {
     semiresult[ent] = malloc(strlen(token) + 1);
@@ -311,20 +311,36 @@ void build_faults(char *faults, int N, int *N_faults) {
   }
   free(token);
 
-  fault = malloc(sizeof(Fault) * *N_faults);
+  fault = malloc(sizeof(Fault) * (*N_faults));
   for (int i = 0; i < *N_faults; i++) {
     int number_tokens = occurrences(semiresult[i], ':') + 1;
     if (number_tokens == 1) {
       fault[i].id = atoi(semiresult[i]);
       fault[i].failed = false;
+      if (fault[i].id == 0 && semiresult[i][0] != '0') {
+        printf("A lista de falhas apresenta uma entrada que nao e numero!\n");
+        exit(1);
+      }
     } else {
       char *token2 = strtok(semiresult[i], ":");
       ent = 0;
       while (token2 != NULL) {
         if (ent++ == 0) {
           fault[i].id = atoi(token2);
+          if (fault[i].id == 0 && token2[0] != '0') {
+            printf(
+                "A lista de falhas apresenta uma entrada que nao e numero!\n");
+            exit(1);
+          }
         } else {
-          fault[i].failed = atoi(token2) == 1;
+          int failedNumber = atoi(token2);
+          if (failedNumber == 0 && token2[0] != '0') {
+            printf(
+                "A lista de falhas apresenta uma entrada que nao e numero!\n");
+            exit(1);
+          } else {
+            fault[i].failed = failedNumber == 1;
+          }
         }
         token2 = strtok(NULL, ":");
       }
