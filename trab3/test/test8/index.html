@@ -1,0 +1,316 @@
+---
+layout: default
+title: Trabalho Prático 3 - Teste 8
+---
+
+<body>
+    <a href="../../">Voltar</a>
+    <h1>Trabalho Prático 3 - Teste 8</h1>
+    <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 5 e as falhas sao randômicas.</p>
+    <p>O programa foi executado com os seguintes parâmetros:</p>
+{% highlight bash %}
+./bebcast 0 8 R
+{% endhighlight %}
+    <p>A evolução do broadcast ao longo do tempo pode ser visualizado abaixo:</p>
+    <img src="./teste8.png" alt="teste 8">
+    <p>O log deste teste pode ser visualizado abaixo:</p>
+    <details>
+        <summary style="cursor: pointer;">› Log do teste 8 (clique para expandir)</summary>
+{% highlight plaintext %}
+A semente da randomizacao: 3038029460
+Este programa foi executado para N=8 processos
+O tempo maximo de simulacao e de 200
+A latencia entre as mensagens e o intervalo de testes e de 30
+A origem do broadcast e o processo 5
+A ordem das falhas no decorrer da simulacao: 0,4,3,6,7
+Os estados inicias de cada processo sao:
+State do processo 0: [0, 0, 0, 0, 0, 0, 0, 0]
+State do processo 1: [0, 0, 0, 0, 0, 0, 0, 0]
+State do processo 2: [0, 0, 0, 0, 0, 0, 0, 0]
+State do processo 3: [0, 0, 0, 0, 0, 0, 0, 0]
+State do processo 4: [0, 0, 0, 0, 0, 0, 0, 0]
+State do processo 5: [0, 0, 0, 0, 0, 0, 0, 0]
+State do processo 6: [0, 0, 0, 0, 0, 0, 0, 0]
+State do processo 7: [0, 0, 0, 0, 0, 0, 0, 0]
+
+******************************************
+
+==========================================
+Executando processo 5 no tempo 0 [BEBCAST]
+Iniciando broadcast com origem 5
+Mensagem entregue pelo processo 5
+Mensagem enviada do processo 5 para o processo 4 com cluster 1
+Mensagem enviada do processo 5 para o processo 7 com cluster 2
+Mensagem enviada do processo 5 para o processo 1 com cluster 3
+
+==========================================
+Executando processo 0 no tempo 30 [TEST]
+
+==========================================
+Executando processo 1 no tempo 30 [TEST]
+
+==========================================
+Executando processo 2 no tempo 30 [TEST]
+
+==========================================
+Executando processo 3 no tempo 30 [TEST]
+
+==========================================
+Executando processo 4 no tempo 30 [TEST]
+
+==========================================
+Executando processo 5 no tempo 30 [TEST]
+
+==========================================
+Executando processo 6 no tempo 30 [TEST]
+
+==========================================
+Executando processo 7 no tempo 30 [TEST]
+
+==========================================
+Executando processo 0 no tempo 30 [FAULT]
+
+--> Event[1]: Processo 0 falhou no tempo 30.0
+
+==========================================
+Executando processo 4 no tempo 30 [RECEIVE_MSG]
+Mensagem recebida pelo processo 4 do processo 5 com cluster 1
+Mensagem entregue pelo processo 4
+O processo 4 nao possui ACKs pendentes
+ACK enviado do processo 4 para o processo 5
+
+==========================================
+Executando processo 7 no tempo 30 [RECEIVE_MSG]
+Mensagem recebida pelo processo 7 do processo 5 com cluster 2
+Mensagem entregue pelo processo 7
+Mensagem enviada do processo 7 para o processo 6 com cluster 1
+
+==========================================
+Executando processo 1 no tempo 30 [RECEIVE_MSG]
+Mensagem recebida pelo processo 1 do processo 5 com cluster 3
+Mensagem entregue pelo processo 1
+Mensagem enviada do processo 1 para o processo 3 com cluster 2
+Mensagem enviada do processo 1 para o processo 0 com cluster 1
+
+==========================================
+Executando processo 4 no tempo 60 [FAULT]
+
+--> O evento agendado para 60.0 foi adiado para 90.0 pois o evento anterior nao foi diagnosticado
+
+==========================================
+Executando processo 1 no tempo 60 [TEST]
+0 falhou e o processo 1 vai reenviar a mensagem
+Nao existem processos corretos no cluster 1 do processo 1
+
+==========================================
+Executando processo 2 no tempo 60 [TEST]
+
+==========================================
+Executando processo 3 no tempo 60 [TEST]
+
+==========================================
+Executando processo 4 no tempo 60 [TEST]
+
+==========================================
+Executando processo 5 no tempo 60 [TEST]
+
+==========================================
+Executando processo 6 no tempo 60 [TEST]
+
+==========================================
+Executando processo 7 no tempo 60 [TEST]
+
+==========================================
+Executando processo 5 no tempo 60 [RECEIVE_ACK]
+ACK recebido pelo processo 5 do processo 4
+Pending do processo 5: [0, 1, 0, 0, 0, 0, 0, 1]
+
+==========================================
+Executando processo 6 no tempo 60 [RECEIVE_MSG]
+Mensagem recebida pelo processo 6 do processo 7 com cluster 1
+Mensagem entregue pelo processo 6
+O processo 6 nao possui ACKs pendentes
+ACK enviado do processo 6 para o processo 7
+
+==========================================
+Executando processo 3 no tempo 60 [RECEIVE_MSG]
+Mensagem recebida pelo processo 3 do processo 1 com cluster 2
+Mensagem entregue pelo processo 3
+Mensagem enviada do processo 3 para o processo 2 com cluster 1
+
+==========================================
+Executando processo 0 no tempo 60 [RECEIVE_MSG]
+
+==========================================
+Executando processo 3 no tempo 90 [FAULT]
+
+--> Event[2]: Processo 3 falhou no tempo 90.0
+
+==========================================
+Executando processo 4 no tempo 90 [FAULT]
+
+--> O evento agendado para 90.0 foi adiado para 120.0 pois o evento anterior nao foi diagnosticado
+
+==========================================
+Executando processo 1 no tempo 90 [TEST]
+3 falhou e o processo 1 vai reenviar a mensagem
+Mensagem enviada do processo 1 para o processo 2 com cluster 2
+
+==========================================
+Executando processo 2 no tempo 90 [TEST]
+
+==========================================
+Executando processo 4 no tempo 90 [TEST]
+
+==========================================
+Executando processo 5 no tempo 90 [TEST]
+
+==========================================
+Executando processo 6 no tempo 90 [TEST]
+
+==========================================
+Executando processo 7 no tempo 90 [TEST]
+
+==========================================
+Executando processo 7 no tempo 90 [RECEIVE_ACK]
+ACK recebido pelo processo 7 do processo 6
+Pending do processo 7: [0, 0, 0, 0, 0, 0, 0, 0]
+O processo 7 nao possui ACKs pendentes
+ACK enviado do processo 7 para o processo 5
+
+==========================================
+Executando processo 2 no tempo 90 [RECEIVE_MSG]
+Mensagem recebida pelo processo 2 do processo 3 com cluster 1
+Mensagem entregue pelo processo 2
+
+==========================================
+Executando processo 6 no tempo 120 [FAULT]
+
+--> O evento agendado para 120.0 foi adiado para 150.0 pois o evento anterior nao foi diagnosticado
+
+==========================================
+Executando processo 4 no tempo 120 [FAULT]
+
+--> O evento agendado para 120.0 foi adiado para 150.0 pois o evento anterior nao foi diagnosticado
+
+==========================================
+Executando processo 1 no tempo 120 [TEST]
+
+==========================================
+Executando processo 2 no tempo 120 [RECEIVE_MSG]
+Mensagem recebida pelo processo 2 do processo 1 com cluster 2
+Nao existem processos corretos no cluster 1 do processo 2
+O processo 2 nao possui ACKs pendentes
+ACK enviado do processo 2 para o processo 1
+
+==========================================
+Executando processo 2 no tempo 120 [TEST]
+
+==========================================
+Executando processo 4 no tempo 120 [TEST]
+
+==========================================
+Executando processo 5 no tempo 120 [TEST]
+
+==========================================
+Executando processo 6 no tempo 120 [TEST]
+
+==========================================
+Executando processo 7 no tempo 120 [TEST]
+
+==========================================
+Executando processo 5 no tempo 120 [RECEIVE_ACK]
+ACK recebido pelo processo 5 do processo 7
+Pending do processo 5: [0, 1, 0, 0, 0, 0, 0, 0]
+
+==========================================
+Executando processo 7 no tempo 150 [FAULT]
+
+--> Event[3]: Processo 7 falhou no tempo 150.0
+
+==========================================
+Executando processo 6 no tempo 150 [FAULT]
+
+--> O evento agendado para 150.0 foi adiado para 180.0 pois o evento anterior nao foi diagnosticado
+
+==========================================
+Executando processo 4 no tempo 150 [FAULT]
+
+--> O evento agendado para 150.0 foi adiado para 180.0 pois o evento anterior nao foi diagnosticado
+
+==========================================
+Executando processo 1 no tempo 150 [TEST]
+
+==========================================
+Executando processo 1 no tempo 150 [RECEIVE_ACK]
+ACK recebido pelo processo 1 do processo 2
+Pending do processo 1: [0, 0, 0, 0, 0, 0, 0, 0]
+O processo 1 nao possui ACKs pendentes
+ACK enviado do processo 1 para o processo 5
+
+==========================================
+Executando processo 2 no tempo 150 [TEST]
+
+==========================================
+Executando processo 4 no tempo 150 [TEST]
+
+==========================================
+Executando processo 5 no tempo 150 [TEST]
+
+==========================================
+Executando processo 6 no tempo 150 [TEST]
+
+==========================================
+Executando processo 6 no tempo 180 [FAULT]
+
+--> O evento agendado para 180.0 foi adiado para 210.0 pois o evento anterior nao foi diagnosticado
+
+==========================================
+Executando processo 4 no tempo 180 [FAULT]
+
+--> O evento agendado para 180.0 foi adiado para 210.0 pois o evento anterior nao foi diagnosticado
+
+==========================================
+Executando processo 1 no tempo 180 [TEST]
+
+==========================================
+Executando processo 5 no tempo 180 [RECEIVE_ACK]
+ACK recebido pelo processo 5 do processo 1
+Pending do processo 5: [0, 0, 0, 0, 0, 0, 0, 0]
+Ultimo ACK recebido! Transmissao completa!
+
+==========================================
+Executando processo 2 no tempo 180 [TEST]
+
+==========================================
+Executando processo 4 no tempo 180 [TEST]
+
+==========================================
+Executando processo 5 no tempo 180 [TEST]
+
+==========================================
+Executando processo 6 no tempo 180 [TEST]
+
+==========================================
+Executando processo 6 no tempo 210 [FAULT]
+
+--> Event[4]: Processo 6 falhou no tempo 210.0
+
+******************************************
+Simulacao encerrada
+
+==========================================
+
+Eventos durante a simulacao:
+Event[1]: FALHA | round 2 | tempo 030.0 | processo 0 | numero de testes de 3 | latencia de 0
+Event[2]: FALHA | round 3 | tempo 090.0 | processo 3 | numero de testes de 2 | latencia de 1
+Event[3]: FALHA | round 5 | tempo 150.0 | processo 7 | numero de testes de 3 | latencia de 1
+Event[4]: FALHA | round 7 | tempo 210.0 | processo 6 | numero de testes de 0 | latencia de -1
+
+==========================================
+Programa finalizado com sucesso
+Autor: Giovanni Rosa :)
+==========================================
+{% endhighlight %}
+    </details>
+</body>
