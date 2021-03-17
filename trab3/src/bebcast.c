@@ -67,9 +67,6 @@ int main(int argc, char *argv[]) {
 
   node_set *nodes;
 
-  if (randomize())
-    fprintf(stderr, "Warning: Could not find any sources for randomness.\n");
-
   // inicializacao da lista de eventos
   event_array = init_array();
 
@@ -133,7 +130,6 @@ int main(int argc, char *argv[]) {
       resend_failed(token, N, logN);
       break;
     case FAULT:
-      printf("Processo %d falhou\n", token);
       failure(token, N, false);
       reset_pending(token, N);
       break;
@@ -141,10 +137,14 @@ int main(int argc, char *argv[]) {
       recovery(token, N);
       break;
     case RECEIVE_MSG:
-      receive_msg(token, N);
+      if (is_correct(token,token)) {
+        receive_msg(token, N);
+      }
       break;
     case RECEIVE_ACK:
-      receive_ACK(token, N);
+      if (is_correct(token,token)) {
+        receive_ACK(token, N);
+      }
       break;
     }
   }
@@ -305,9 +305,14 @@ void user_input(int *N, int *N_faults, int argc, char *argv[]) {
   source = atoi(argv[1]);
   *N = atoi(argv[2]);
   if (argc == 4) {
-    build_faults(argv[3], *N, N_faults);
-  } else {
-    build_random(*N, N_faults);
+    if (strcmp(argv[3], "R") == 0) {
+      if (randomize())
+        fprintf(stderr,
+                "Warning: Could not find any sources for randomness.\n");
+      build_random(*N, N_faults);
+    } else {
+      build_faults(argv[3], *N, N_faults);
+    }
   }
 
   if (source >= *N) {
@@ -440,7 +445,7 @@ void schedule_events(int N, int N_faults) {
     }
   }
 
-  int init = LATENCY * 2;
+  int init = LATENCY;
   bool print_sched = false;
   for (int i = 0; i < N_faults; i++) {
     if (fault[i].failed) {

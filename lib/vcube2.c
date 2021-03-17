@@ -120,15 +120,11 @@ bool failure(int token, int N, bool ignore_diag) {
   create_event(N, 1, token);
   int r = request(process[token].id, token, 0);
   if (r != 0) {
-    if (PRINT) {
-      printf("\nNao foi possivel falhar o processo %d\n", token);
-    }
+    printf("\nNao foi possivel falhar o processo %d\n", token);
     exit(1);
   } else {
-    if (PRINT) {
-      printf("\n--> Event[%d]: Processo %d falhou no tempo %4.1f\n", event->id,
-             token, time());
-    }
+    printf("\n--> Event[%d]: Processo %d falhou no tempo %4.1f\n", event->id,
+           token, time());
   }
   return true;
 }
@@ -213,11 +209,9 @@ void count_round(int N, int logN) {
 }
 
 void delay_event(int type, int token) {
-  if (PRINT) {
-    printf("\n--> O evento agendado para %2.1f foi adiado para %2.1f pois o "
-           "evento anterior nao foi diagnosticado\n",
-           time(), time() + 30.0);
-  }
+  printf("\n--> O evento agendado para %2.1f foi adiado para %2.1f pois o "
+         "evento anterior nao foi diagnosticado\n",
+         time(), time() + 30.0);
   schedule(type, 30.0, token);
 }
 
