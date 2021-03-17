@@ -1,6 +1,6 @@
 /*
   Autor: Giovanni Rosa
-  Ultima modificao: 15/03/2021
+  Ultima modificao: 17/03/2021
 
 Declaracao do programa Bebcast
 */
@@ -14,7 +14,7 @@ Declaracao do programa Bebcast
 // CONSTANTES ========================================
 
 // Tempo maximo de simulacao
-#define MAX_TIME 190
+#define MAX_TIME 200
 
 // Latencia entre as mensagens
 #define LATENCY 30
@@ -157,6 +157,20 @@ void user_input(int *N, int *N_faults, int argc, char *argv[]);
 void build_faults(char *faults, int N, int *N_faults);
 
 /**
+ * Constroi as falhas de maneira aleatoria
+ * @param N numero total de processos
+ * @param N_faults numero total de falhas
+ */
+void build_random(int N, int *N_faults);
+
+/**
+ * Verifica se candidato ja existe no vetor de falhas
+ * @param N_faults numero total de falhas
+ * @param p candidato a ser incluido nas falhas
+ */
+bool already_exists(int N_faults, int p);
+
+/**
  * Verifica o numero de ocorrencias de um caracter em uma string
  * @param str string a ser verificada
  * @param del caracter a ser procurado
@@ -188,7 +202,7 @@ bool search_fault_failed(int p, int N_faults);
  * @param upper indice do processo
  * @param lower numero total de falhas
  */
-int gen_rand(int upper, int lower);
+int gen_rand(int lower, int upper);
 
 /**
  * Imprime o vetor de pendentes de um processo especifico

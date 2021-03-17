@@ -1,6 +1,6 @@
 /*
   Autor: Giovanni Rosa
-  Ultima modificao: 15/03/2021
+  Ultima modificao: 17/03/2021
 
 Programa dedicado a implementacao do Best-Effort Broadcast sobre o VCube como
 requisito para o Trabalho Pratico 3 da disciplina de Sistemas Distribuidos.
@@ -28,6 +28,35 @@ toda esta situacao no seu log!
 
 #include "bebcast.h"
 
+static int randomize_helper(FILE *in) {
+  unsigned int seed;
+
+  if (!in)
+    return -1;
+
+  if (fread(&seed, sizeof seed, 1, in) == 1) {
+    fclose(in);
+    printf("A semente da randomizacao: %u\n", seed);
+    srand(seed);
+    return 0;
+  }
+
+  fclose(in);
+  return -1;
+}
+
+static int randomize(void) {
+  if (!randomize_helper(fopen("/dev/urandom", "r")))
+    return 0;
+  if (!randomize_helper(fopen("/dev/arandom", "r")))
+    return 0;
+  if (!randomize_helper(fopen("/dev/random", "r")))
+    return 0;
+
+  /* No randomness sources found. */
+  return -1;
+}
+
 int main(int argc, char *argv[]) {
   static int N,        // numero de processos
       N_faults,        // numero de falhas
@@ -37,6 +66,9 @@ int main(int argc, char *argv[]) {
   const char *t_result;
 
   node_set *nodes;
+
+  if (randomize())
+    fprintf(stderr, "Warning: Could not find any sources for randomness.\n");
 
   // inicializacao da lista de eventos
   event_array = init_array();
@@ -51,11 +83,6 @@ int main(int argc, char *argv[]) {
   // inicializa processos
   init_process(N);
   init_difusion(N);
-
-  // Use current time as seed for random generator
-  // double seed = 123;
-  // printf("random seed = %lf\n", seed);
-  // srand(seed);
 
   // escalonamento inicial de eventos
   // intervalo de testes de 30 unidades de tempo
@@ -279,6 +306,8 @@ void user_input(int *N, int *N_faults, int argc, char *argv[]) {
   *N = atoi(argv[2]);
   if (argc == 4) {
     build_faults(argv[3], *N, N_faults);
+  } else {
+    build_random(*N, N_faults);
   }
 
   if (source >= *N) {
@@ -359,6 +388,36 @@ void build_faults(char *faults, int N, int *N_faults) {
   free(semiresult);
 }
 
+void build_random(int N, int *N_faults) {
+  // numero de falhas aleatorio
+  *N_faults = gen_rand(0, N - 1);
+
+  // inicializa vetor de falhas
+  fault = malloc(sizeof(Fault) * (*N_faults));
+  for (int i = 0; i < *N_faults; ++i) {
+    fault[i].id = -1;
+  }
+
+  // processos que falharao aleatorios e distintos
+  for (int i = 0; i < *N_faults; ++i) {
+    int candidate;
+    do {
+      candidate = gen_rand(0, N - 1);
+    } while (already_exists(*N_faults, candidate));
+    fault[i].id = candidate;
+    fault[i].failed = false;
+  }
+}
+
+bool already_exists(int N_faults, int p) {
+  for (int i = 0; i < N_faults; ++i) {
+    if (fault[i].id == p) {
+      return true;
+    }
+  }
+  return false;
+}
+
 int occurrences(char *str, char del) {
   int len = strlen(str);
   int c = 0;
@@ -382,9 +441,8 @@ void schedule_events(int N, int N_faults) {
   }
 
   int init = LATENCY * 2;
+  bool print_sched = false;
   for (int i = 0; i < N_faults; i++) {
-    // printf("id = %d, failed = %s\n", fault[i].id,
-    //        fault[i].failed ? "true" : "false");
     if (fault[i].failed) {
       failure(fault[i].id, N, true);
       for (int j = 0; j < N; ++j) {
@@ -393,30 +451,28 @@ void schedule_events(int N, int N_faults) {
         }
       }
     } else {
+      if (!print_sched) {
+        printf("A ordem das falhas no decorrer da simulacao: ");
+        print_sched = true;
+      }
+      printf("%d", fault[i].id);
+      if (i != N_faults - 1) {
+        printf(",");
+      }
       schedule(FAULT, init, fault[i].id);
       init += LATENCY;
     }
+  }
+  if (print_sched) {
+    puts("");
+  } else {
+    puts("Nao existem falhas agendadas para o decorrer da simulacao");
   }
 
   puts("Os estados inicias de cada processo sao:");
   for (int i = 0; i < N; ++i) {
     print_state(N, i, -1);
   }
-
-  // for (int i = 0; i < N_faults; i++) {
-  // printf("id = %d, time = %d\n", fault[i].id, fault[i].time);
-  // if (fault[i].time == -1) {
-  //   schedule(FAULT, gen_rand(MAX_TIME, 10) * 30, i);
-  // } else if (fault[i].time == 0) {
-
-  // } else {
-  //   schedule(FAULT, fault[i].time, i);
-  // }
-  // }
-  // schedule(FAULT, 35.0, 7);
-  // schedule(RECOVERY, 130.0, 7);
-  // schedule(RECOVERY, 170.0, 1);
-  // schedule(RECOVERY, 240.0, 2);
 }
 
 void init_difusion(int N) {
@@ -443,7 +499,7 @@ bool search_fault_failed(int p, int N_faults) {
   return false;
 }
 
-int gen_rand(int upper, int lower) {
+int gen_rand(int lower, int upper) {
   return (rand() % (upper - lower + 1)) + lower;
 }
 
