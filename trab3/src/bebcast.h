@@ -14,7 +14,7 @@ Declaracao do programa Bebcast
 // CONSTANTES ========================================
 
 // Tempo maximo de simulacao
-#define MAX_TIME 310
+#define MAX_TIME 190
 
 // Latencia entre as mensagens
 #define LATENCY 30

@@ -46,8 +46,25 @@ title: Trabalho Prático 3
                     <p>A lista de falhas é opcional, e caso seja omitida o programa executará no modo aleatório.</p>
                 </li>
                 <li>
-                    <p>A lista de falhas deve ser &lt;processo&gt;:&lt;0=correto ou 1=falho&gt; separados por vírgula.</p>
-                    <p>Ex.: ./bebcast 0 4 0:1,1:0,2:0,3:1</p>
+                    <p>A lista de falhas deve ser &lt;processo&gt;:&lt;0=inicio falho ou 1=falho no decorrer&gt; separados por vírgula.
+                        Caso o 0 ou 1 for omitido, o processo será definido como falho ao decorrer da simulação. Caso o processo for omitido
+                        da lista de falhas, ele será correto em toda a simulação.</p>
+                    <p>Ex.: ./bebcast 0 4 0:1,3:0,2:0</p>
+                    <p>Nesse caso o fonte será o 0 com 4 processos no total. O processo 0 inicia como falho, o 1 se mantém correto
+                        sempre, e o 3 e 2 falham no decorrer da simulação, nessa ordem.</p>
+                </li>
+                <li>
+                    <p>A lista de falhas representa uma ordem desejada para as falhas ocorrerem e não tem um momento garantido para
+                        respeitar a restrição de que uma falha só pode ocorrer quando a anterior é diagnosticada.</p>
+                </li>
+                <li>
+                    <p>As falhas definidas para ocorrer ao longo da simulação (valor 1) serão agendadas para ocorrer na ordem da entrada.</p>
+                </li>
+                <li>
+                    <p>As falhas ocorrem a partir do tempo 30 e as seguintes são agendadas assim que a anterior é diagnosticada.</p>
+                </li>
+                <li>
+                    <p>O modo aleatório gera a ordem de falhas desejada e ocorrem da mesma forma que as falhas entradas pelo usuário.</p>
                 </li>
             </ul>
             <p>Os testes a seguir foram executados para demonstrar a corretude do programa. Cada teste está separado em
@@ -75,19 +92,19 @@ A lista de falhas apresenta uma entrada que nao e numero!
                 16 e 32 processos, todos corretos (3 cenários sem falhas).</p>
             <a href="./test/test1/">Ir para a página do teste 1</a>
             <h3 id="teste2">Teste 2</h3>
-            <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 0 e estão falhos 2, 4 e 5. Mostre
-                claramente quais mensagens são transmitidas.</p>
+            <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 0 e estão falhos 2, 4 e 5.</p>
             <a href="./test/test2/">Ir para a página do teste 2</a>
             <h3 id="teste3">Teste 3</h3>
-            <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 7 e estão falhos 3 e 1. Mostre
-                claramente quais mensagens são transmitidas.</p>
+            <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 7 e estão falhos 3 e 1.</p>
             <a href="./test/test3/">Ir para a página do teste 3</a>
             <h3 id="teste4">Teste 4</h3>
-            <p>Em um sistema com 16 processos, o broadcast é iniciado pelo processo 0 e estão falhos 2, 8, 9 e 12.
-                Mostre claramente quais mensagens são transmitidas.</p>
+            <p>Em um sistema com 16 processos, o broadcast é iniciado pelo processo 0 e estão falhos 2, 8, 9 e 12.</p>
             <a href="./test/test4/">Ir para a página do teste 4</a>
             <h3 id="teste5">Teste 5</h3>
-            <p>Em um sistema com 32 processos, o broadcast é iniciado pelo processo 16 e estão falhos 0, 2, 4 e 8.
-                Mostre claramente quais mensagens são transmitidas.</p>
+            <p>Em um sistema com 32 processos, o broadcast é iniciado pelo processo 16 e estão falhos 0, 2, 4 e 8.</p>
             <a href="./test/test5/">Ir para a página do teste 5</a>
+            <h3 id="teste6">Teste 6</h3>
+            <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 0 e o processo 2 falha após receber a mensagem do
+                processo 0.</p>
+            <a href="./test/test6/">Ir para a página do teste 6</a>
 </body>

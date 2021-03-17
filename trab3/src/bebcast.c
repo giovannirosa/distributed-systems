@@ -80,6 +80,9 @@ int main(int argc, char *argv[]) {
              token, N);
       exit(1);
     }
+    if (e == TEST && process[token].state[token] % 2 != 0) {
+      continue;
+    }
     puts("\n==========================================");
     const char *exec = "TEST";
     switch (e) {
