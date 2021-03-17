@@ -129,11 +129,11 @@ void delay_event(int type, int token);
 /**
  * Imprime os processos do cluster
  * @param nodes vetor de processos do cluster
- * @param cluster index do cluster
+ * @param token index do processo
  * @param size tamanho do vetor de processos do cluster
  * @param s indice do cluster
  */
-void print_cluster(int nodes[], int cluster, int size, int s);
+void print_cluster(int nodes[], int token, int size, int s);
 
 /**
  * Imprime o vetor de estados de um processo especifico
