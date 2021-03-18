@@ -25,7 +25,7 @@ title: Trabalho Prático 3
     </p>
     <p>O código foi escrito a partir do código do <a href="../trab2/vcube2/src/vcube2.c">vcube2.c</a> da <a
             href="../trab2/vcube2/">Versão 2</a> do <a href="../trab2/">Trabalho Prático 2</a>. As seguintes alterações
-        foram realizadas para cumprir os requisitos do Trabalho Prático 2:</p>
+        foram realizadas para cumprir os requisitos do Trabalho Prático 3:</p>
     <ol>
         <li>Definida constante de latência para a troca de mensagens e intervalo de testes:</li>
 {% highlight c %}
@@ -46,7 +46,7 @@ typedef struct {
   bool failed; // inicialmente falho
 } Fault;
 {% endhighlight %}
-        <li>Estrutura de dados para as mensagens, identificando o tipo (mensagem ou ACK), o emissor e o indice do cluster a que o recebedor pertence ao emissor:</li>
+        <li>Estrutura de dados para as mensagens, identificando o tipo (mensagem ou ACK), o emissor e o indice do cluster a que o receptor pertence ao emissor:</li>
 {% highlight c %}
 // Descritor da mensagem
 typedef struct {
@@ -270,7 +270,7 @@ void user_input(int *N, int *N_faults, int argc, char *argv[]) {
                     <p>A fonte do broadcast deve estar dentro do conjunto de processos.</p>
                 </li>
                 <li>
-                    <p>A lista de falhas é opcional, e caso seja omitida o programa executará no modo aleatório.</p>
+                    <p>A lista de falhas é opcional, e caso seja omitida o programa executará sem falhas.</p>
                 </li>
                 <li>
                     <p>A lista de falhas deve ser &lt;processo&gt;:&lt;0=inicio falho ou 1=falho no decorrer&gt; separados por vírgula.
@@ -285,10 +285,12 @@ void user_input(int *N, int *N_faults, int argc, char *argv[]) {
                         respeitar a restrição de que uma falha só pode ocorrer quando a anterior é diagnosticada.</p>
                 </li>
                 <li>
-                    <p>As falhas definidas para ocorrer ao longo da simulação (valor 1) serão agendadas para ocorrer na ordem da entrada.</p>
+                    <p>As falhas definidas para ocorrer ao longo da simulação (valor 1) serão agendadas para ocorrer na ordem da entrada.
+                        Porem nao há garantia total, uma vez que as falhas são agendadas sempre para o proximo ciclo sem garantia de que um
+                        processo X executa antes de um processo Y.</p>
                 </li>
                 <li>
-                    <p>As falhas ocorrem a partir do tempo 30 e as seguintes são agendadas assim que a anterior é diagnosticada.</p>
+                    <p>As falhas ocorrem a partir do tempo 30 e as seguintes são agendadas assim que a anterior é diagnosticada para o ciclo seguinte.</p>
                 </li>
                 <li>
                     <p>O modo aleatório gera a ordem de falhas desejada e ocorrem da mesma forma que as falhas entradas pelo usuário.</p>
