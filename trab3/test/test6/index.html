@@ -4,7 +4,7 @@ title: Trabalho Prático 3 - Teste 6
 ---
 
 <body>
-    <a href="../../">Voltar</a>
+    <a href="../../#teste6">Voltar</a>
     <h1>Trabalho Prático 3 - Teste 6</h1>
     <p>Em um sistema com 8 processos, o broadcast é iniciado pelo processo 0 e os processos 2 e 6 falham após receber a mensagem.</p>
     <p>O programa foi executado com os seguintes parâmetros:</p>
@@ -12,13 +12,13 @@ title: Trabalho Prático 3 - Teste 6
 ./bebcast 0 8 2,6
 {% endhighlight %}
     <p>A evolução do broadcast ao longo do tempo pode ser visualizado abaixo:</p>
-    <img src="./teste6.png" alt="teste 6">
+    <img src="./teste6.png?1" alt="teste 6">
     <p>O log deste teste pode ser visualizado abaixo:</p>
     <details>
         <summary style="cursor: pointer;">› Log do teste 6 (clique para expandir)</summary>
 {% highlight plaintext %}
 Este programa foi executado para N=8 processos
-O tempo maximo de simulacao e de 190
+O tempo maximo de simulacao e de 200
 A latencia entre as mensagens e o intervalo de testes e de 30
 A origem do broadcast e o processo 0
 A ordem das falhas no decorrer da simulacao: 2,6
@@ -67,6 +67,11 @@ Executando processo 6 no tempo 30 [TEST]
 Executando processo 7 no tempo 30 [TEST]
 
 ==========================================
+Executando processo 2 no tempo 30 [FAULT]
+
+--> Event[1]: Processo 2 falhou no tempo 30.0
+
+==========================================
 Executando processo 1 no tempo 30 [RECEIVE_MSG]
 Mensagem recebida pelo processo 1 do processo 0 com cluster 1
 Mensagem entregue pelo processo 1
@@ -75,9 +80,6 @@ ACK enviado do processo 1 para o processo 0
 
 ==========================================
 Executando processo 2 no tempo 30 [RECEIVE_MSG]
-Mensagem recebida pelo processo 2 do processo 0 com cluster 2
-Mensagem entregue pelo processo 2
-Mensagem enviada do processo 2 para o processo 3 com cluster 1
 
 ==========================================
 Executando processo 4 no tempo 30 [RECEIVE_MSG]
@@ -87,8 +89,9 @@ Mensagem enviada do processo 4 para o processo 6 com cluster 2
 Mensagem enviada do processo 4 para o processo 5 com cluster 1
 
 ==========================================
-Executando processo 2 no tempo 60 [FAULT]
-Processo 2 falhou
+Executando processo 6 no tempo 60 [FAULT]
+
+--> O evento agendado para 60.0 foi adiado para 90.0 pois o evento anterior nao foi diagnosticado
 
 ==========================================
 Executando processo 0 no tempo 60 [TEST]
@@ -119,11 +122,6 @@ ACK recebido pelo processo 0 do processo 1
 Pending do processo 0: [0, 0, 0, 1, 1, 0, 0, 0]
 
 ==========================================
-Executando processo 3 no tempo 60 [RECEIVE_MSG]
-Mensagem recebida pelo processo 3 do processo 2 com cluster 1
-Mensagem entregue pelo processo 3
-
-==========================================
 Executando processo 6 no tempo 60 [RECEIVE_MSG]
 Mensagem recebida pelo processo 6 do processo 4 com cluster 2
 Mensagem entregue pelo processo 6
@@ -138,7 +136,8 @@ ACK enviado do processo 5 para o processo 4
 
 ==========================================
 Executando processo 6 no tempo 90 [FAULT]
-Processo 6 falhou
+
+--> Event[2]: Processo 6 falhou no tempo 90.0
 
 ==========================================
 Executando processo 0 no tempo 90 [TEST]
@@ -146,6 +145,7 @@ Executando processo 0 no tempo 90 [TEST]
 ==========================================
 Executando processo 3 no tempo 90 [RECEIVE_MSG]
 Mensagem recebida pelo processo 3 do processo 0 com cluster 2
+Mensagem entregue pelo processo 3
 Nao existem processos corretos no cluster 1 do processo 3
 O processo 3 nao possui ACKs pendentes
 ACK enviado do processo 3 para o processo 0
@@ -265,7 +265,7 @@ Simulacao encerrada
 ==========================================
 
 Eventos durante a simulacao:
-Event[1]: FALHA | round 2 | tempo 060.0 | processo 2 | numero de testes de 2 | latencia de 0
+Event[1]: FALHA | round 2 | tempo 030.0 | processo 2 | numero de testes de 2 | latencia de 0
 Event[2]: FALHA | round 3 | tempo 090.0 | processo 6 | numero de testes de 3 | latencia de 1
 
 ==========================================
