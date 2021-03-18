@@ -25,10 +25,237 @@ title: Trabalho Prático 3
     </p>
     <p>O código foi escrito a partir do código do <a href="../trab2/vcube2/src/vcube2.c">vcube2.c</a> da <a
             href="../trab2/vcube2/">Versão 2</a> do <a href="../trab2/">Trabalho Prático 2</a>. As seguintes alterações
-        foram
-        realizadas para cumprir os requisitos do Trabalho Prático 2:</p>
+        foram realizadas para cumprir os requisitos do Trabalho Prático 2:</p>
     <ol>
-        <li>Funções auxiliares para a simulação que estão descritas no <a href="./src/bebcast.h">bebcast.h</a></li>
+        <li>Definida constante de latência para a troca de mensagens e intervalo de testes:</li>
+{% highlight c %}
+#define LATENCY 30
+{% endhighlight %}
+        <li>Definidos mais dois eventos da simulação para recebimento de mensagens e ACKs:</li>
+{% highlight c %}
+// Evento de recebimento de mensagem
+#define RECEIVE_MSG 4
+// Evento de recebimento de ACK
+#define RECEIVE_ACK 5
+{% endhighlight %}
+        <li>Estrutura de dados para a lista de falhas, com o id do processo e se ele inicia como falho ou falha no decorrer da simulação:</li>
+{% highlight c %}
+// Descritor da lista de falhas
+typedef struct {
+  int id;      // identificador do processo
+  bool failed; // inicialmente falho
+} Fault;
+{% endhighlight %}
+        <li>Estrutura de dados para as mensagens, identificando o tipo (mensagem ou ACK), o emissor e o indice do cluster a que o recebedor pertence ao emissor:</li>
+{% highlight c %}
+// Descritor da mensagem
+typedef struct {
+  int type;   // tipo da mensagem: 0 = msg, 1 = ack
+  int sender; // processo que enviou a mensagem
+  int s;      // indice do cluster da mensagem
+} ProcessMessage;
+{% endhighlight %}
+        <li>Estrutura de dados para cada processo no broadcast, com id do processo, lista de mensagens recebidas, se a mensagem foi entregue (só há um broadcast por execução) e uma lista de ACKs pendentes:</li>
+{% highlight c %}
+// Descritor da difusao do processo
+typedef struct {
+  int id;           // identificador de facility do SMPL
+  Array messages;   // lista de mensagens destinadas
+  bool delivered;   // indica se mensagem foi entregue
+  bool *pendingACK; // lista de acks pendentes
+} ProcessDifusion;
+{% endhighlight %}
+        <li>Inicio do broadcast sempre no tempo 0, entregando a mensagem e enviando-a para o primeiro processo correto de cada cluster, se houver:</li>
+{% highlight c %}
+void bebcast(int source, int logN) {
+    // apenas um bebcast por vez
+    if (!is_delivered(source)) {
+        puts("\n******************************************");
+        puts("\n==========================================");
+        printf("Executando processo %d no tempo 0 [BEBCAST]\n", source);
+        printf("Iniciando broadcast com origem %d\n", source);
+        // entrega a mensagem
+        deliver(source);
+        // envia broadcast para o primeiro processo correto de cada cluster
+        for (int s = 1; s <= logN; ++s) {
+            calc_send(source, s);
+        }
+    }
+}
+{% endhighlight %}
+        <li>Função auxiliar para envio da mensagem para o primeiro processo correto de um cluster especifico de um emissor:</li>
+{% highlight c %}
+void calc_send(int token, int s) {
+    // obtem o primeiro processo correto do processo token no cluster s
+    int first = FFneighbor(token, s, token);
+    if (first != -1) {
+        // envia mensagem
+        send_msg(token, s, first);
+        // marca como ACK pendente
+        difusion[token].pendingACK[first] = true;
+    } else {
+        printf("Nao existem processos corretos no cluster %d do processo %d\n", s,
+                token);
+    }
+}
+{% endhighlight %}
+        <li>Função para envio da mensagem de um emissor para um receptor com cluster ao qual o receptor pertence no emissor. A mensagem é inserida na fila de mensagens do receptor e é agendado um evento para ele:</li>
+{% highlight c %}
+void send_msg(int sender, int s, int receiver) {
+    ProcessMessage *msg = (ProcessMessage *)malloc(sizeof(ProcessMessage));
+    msg->type = 0;        // tipo = mensagem
+    msg->s = s;           // cluster
+    msg->sender = sender; // emissor
+    // insere na fila de mensagens do receptor
+    insert_array(difusion[receiver].messages, msg);
+    printf("Mensagem enviada do processo %d para o processo %d com cluster %d\n",
+            sender, receiver, s);
+    // agenda evento para o receptor
+    schedule(RECEIVE_MSG, LATENCY, receiver);
+}
+{% endhighlight %}
+        <li>Função para envio do ACK de um emissor para um receptor. O ACK é inserido na fila de mensagens do receptor e é agendado um evento para ele:</li>
+{% highlight c %}
+void send_ACK(int sender, int receiver) {
+    printf("O processo %d nao possui ACKs pendentes\n", sender);
+    ProcessMessage *msg = (ProcessMessage *)malloc(sizeof(ProcessMessage));
+    msg->type = 1;        // tipo = ACK
+    msg->s = -1;          // cluster irrelevante
+    msg->sender = sender; // emissor
+    // insere na fila de mensagens do receptor
+    insert_array(difusion[receiver].messages, msg);
+    printf("ACK enviado do processo %d para o processo %d\n", sender, receiver);
+    // agenda evento para o receptor
+    schedule(RECEIVE_ACK, LATENCY, receiver);
+}
+{% endhighlight %}
+        <li>Função para recebimento de uma mensagem. O processo consome a primeira mensagem (que chegou antes), entrega caso não tenha entregue e prossegue com o broadcast ou envio de ACKs, caso a origem e o emissor estejam corretos:</li>
+{% highlight c %}
+void receive_msg(int token, int N) {
+    // Consome primeira mensagem na lista, que foi incluida primeiro
+    ProcessMessage *msg = retrieve_msg(token);
+    printf("Mensagem recebida pelo processo %d do processo %d com cluster %d\n",
+            token, msg->sender, msg->s);
+    // entrega mensagem, caso ainda nao entregue
+    if (!is_delivered(token)) {
+        deliver(token);
+    }
+    // prossegue com broadcast ou ACK, caso origem e emissor corretos
+    if (is_correct(token, source) && is_correct(token, msg->sender)) {
+        int s = msg->s;
+        while (--s != 0) {
+            // envia mensagem para primeiro processo correto do cluster
+            calc_send(token, s);
+        }
+        // caso nao existam ACKs pendentes, retorna ACK para emissor
+        if (msg->sender != -1 && !any_pending(token, N)) {
+            send_ACK(token, msg->sender);
+        }
+    }
+}
+{% endhighlight %}
+        <li>Função para recebimento de um ACK. O processo consome a primeira mensagem (que chegou antes), atualiza lista de ACKs pendentes e, caso não existam mais ACKs pendentes, retorna ACK para processos que estao aguardando. Se for ultimo ACK recebido pela origem, broadcast completo:</li>
+{% highlight c %}
+void receive_ACK(int token, int N) {
+    // Consome primeira mensagem na lista, que foi incluida primeiro
+    ProcessMessage *msg = retrieve_msg(token);
+    printf("ACK recebido pelo processo %d do processo %d\n", token, msg->sender);
+    // atualiza lista de ACKs pendentes
+    difusion[token].pendingACK[msg->sender] = false;
+    // imprime lista de ACKs pendentes
+    print_pending(N, token);
+    // caso nao haja mais ACKs pendentes, retorna ACKs para processos que estao aguardando
+    if (!any_pending(token, N)) {
+        for (int i = 0; i < N; ++i) {
+            if (difusion[i].pendingACK[token]) {
+                send_ACK(token, i);
+            }
+        }
+    }
+    // se for ultimo ACK recebido pela origem, broadcast completo
+    if (token == source && !any_pending(token, N)) {
+        printf("Ultimo ACK recebido! Transmissao completa!\n");
+    }
+}
+{% endhighlight %}
+        <li>Função auxiliar para consumir a primeira mensagem da lista de mensagens do receptor:</li>
+{% highlight c %}
+ProcessMessage *retrieve_msg(int token) {
+    Node node = difusion[token].messages->ini;
+    ProcessMessage *msg = node->cont;
+    remove_array_spec(difusion[token].messages, node);
+    return msg;
+}
+{% endhighlight %}
+    <li>Função auxiliar para reenviar mensagem para o próximo processo correto do cluster em caso de detecção de falhas:</li>
+{% highlight c %}
+void resend_failed(int token, int N, int logN) {
+    for (int i = 0; i < N; ++i) {
+        if (!is_correct(token, i) && difusion[token].pendingACK[i]) {
+            printf("%d falhou e o processo %d vai reenviar a mensagem\n", i, token);
+            difusion[token].pendingACK[i] = false;
+            int s = cluster(i, token, logN);
+            calc_send(token, s);
+        }
+    }
+}
+{% endhighlight %}
+        <li>Função para entrega da mensagem:</li>
+{% highlight c %}
+void deliver(int token) {
+    difusion[token].delivered = true;
+    printf("Mensagem entregue pelo processo %d\n", token);
+}
+{% endhighlight %}
+        <li>Função para assimilar a entrada do usuário. Aceita 3 ou 4 argumentos. Se a lista de falhas for omitida, a simulação executará sem falhas. Caso o quarto argumento seja R, a simulação executará com falhas randômicas. Caso seja uma lista válida de processos, constrói as falhas a partir dela:</li>
+{% highlight c %}
+void user_input(int *N, int *N_faults, int argc, char *argv[]) {
+    // verifica numero de entradas correto
+    if (argc != 3 && argc != 4) {
+        puts("Uso correto: bebcast <fonte do broadcast> <numero de processos> "
+            "<lista de falhas opcional (#,#:#)>");
+        exit(1);
+    }
+    
+    source = atoi(argv[1]); // origem
+    *N = atoi(argv[2]); // numero de processos
+    // caso 4 argumentos, constroi lista de falhas
+    if (argc == 4) {
+        if (strcmp(argv[3], "R") == 0) {
+            // randomico
+            if (randomize())
+                fprintf(stderr,
+                        "Warning: Could not find any sources for randomness.\n");
+            build_random(*N, N_faults);
+        } else {
+            // definido pela entrada do usuario
+            build_faults(argv[3], *N, N_faults);
+        }
+    }
+    
+    // validacoes das entradas
+    if (source >= *N) {
+        printf("O processo fonte %d (F) deve estar dentro do numero de processos "
+                "%d (N)! [F < N]\n",
+                source, *N);
+        exit(1);
+    } else if (*N < 2) {
+        printf("O numero minimo de processos e 2!\n");
+        exit(1);
+    } else if (argc == 4 && fault == NULL) {
+        printf("A lista de falhas deve seguir o formato: <processo>:<tempo da "
+                "falha opcional>\n\t\t\t\tex.: 0:30,2:60,5,7:120\n");
+        exit(1);
+    } else {
+        printf("Este programa foi executado para N=%d processos\n", *N);
+        printf("O tempo maximo de simulacao e de %d\n", MAX_TIME);
+        printf("A latencia entre as mensagens e o intervalo de testes e de %d\n",
+                LATENCY);
+        printf("A origem do broadcast e o processo %d\n", source);
+    }
+}
+{% endhighlight %}
+        <li>Outras funções auxiliares para a simulação que estão descritas no <a href="./src/bebcast.h">bebcast.h</a></li>
     </ol>
     <h2>Execução</h2>
     <p>O programa deve ser executado seguindo o modelo esperado:</p>

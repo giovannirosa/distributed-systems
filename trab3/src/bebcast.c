@@ -137,12 +137,12 @@ int main(int argc, char *argv[]) {
       recovery(token, N);
       break;
     case RECEIVE_MSG:
-      if (is_correct(token,token)) {
+      if (is_correct(token, token)) {
         receive_msg(token, N);
       }
       break;
     case RECEIVE_ACK:
-      if (is_correct(token,token)) {
+      if (is_correct(token, token)) {
         receive_ACK(token, N);
       }
       break;
@@ -169,9 +169,12 @@ int main(int argc, char *argv[]) {
 }
 
 void calc_send(int token, int s) {
+  // obtem o primeiro processo correto do processo token no cluster s
   int first = FFneighbor(token, s, token);
   if (first != -1) {
+    // envia mensagem
     send_msg(token, s, first);
+    // marca como ACK pendente
     difusion[token].pendingACK[first] = true;
   } else {
     printf("Nao existem processos corretos no cluster %d do processo %d\n", s,
@@ -186,7 +189,9 @@ void bebcast(int source, int logN) {
     puts("\n==========================================");
     printf("Executando processo %d no tempo 0 [BEBCAST]\n", source);
     printf("Iniciando broadcast com origem %d\n", source);
+    // entrega a mensagem
     deliver(source);
+    // envia broadcast para o primeiro processo correto de cada cluster
     for (int s = 1; s <= logN; ++s) {
       calc_send(source, s);
     }
@@ -195,23 +200,27 @@ void bebcast(int source, int logN) {
 
 void send_msg(int sender, int s, int receiver) {
   ProcessMessage *msg = (ProcessMessage *)malloc(sizeof(ProcessMessage));
-  msg->type = 0;
-  msg->s = s;
-  msg->sender = sender;
+  msg->type = 0;        // tipo = mensagem
+  msg->s = s;           // cluster
+  msg->sender = sender; // emissor
+  // insere na fila de mensagens do receptor
   insert_array(difusion[receiver].messages, msg);
   printf("Mensagem enviada do processo %d para o processo %d com cluster %d\n",
          sender, receiver, s);
+  // agenda evento para o receptor
   schedule(RECEIVE_MSG, LATENCY, receiver);
 }
 
 void send_ACK(int sender, int receiver) {
   printf("O processo %d nao possui ACKs pendentes\n", sender);
   ProcessMessage *msg = (ProcessMessage *)malloc(sizeof(ProcessMessage));
-  msg->type = 1;
-  msg->s = -1;
-  msg->sender = sender;
+  msg->type = 1;        // tipo = ACK
+  msg->s = -1;          // cluster irrelevante
+  msg->sender = sender; // emissor
+  // insere na fila de mensagens do receptor
   insert_array(difusion[receiver].messages, msg);
   printf("ACK enviado do processo %d para o processo %d\n", sender, receiver);
+  // agenda evento para o receptor
   schedule(RECEIVE_ACK, LATENCY, receiver);
 }
 
@@ -227,15 +236,18 @@ void receive_msg(int token, int N) {
   ProcessMessage *msg = retrieve_msg(token);
   printf("Mensagem recebida pelo processo %d do processo %d com cluster %d\n",
          token, msg->sender, msg->s);
+  // entrega mensagem, caso ainda nao entregue
   if (!is_delivered(token)) {
     deliver(token);
   }
+  // prossegue com broadcast ou ACK, caso origem e emissor corretos
   if (is_correct(token, source) && is_correct(token, msg->sender)) {
     int s = msg->s;
     while (--s != 0) {
-      // printf("processo %d, cluster %d\n", token, s);
+      // envia mensagem para primeiro processo correto do cluster
       calc_send(token, s);
     }
+    // caso nao existam ACKs pendentes, retorna ACK para emissor
     if (msg->sender != -1 && !any_pending(token, N)) {
       send_ACK(token, msg->sender);
     }
@@ -246,8 +258,11 @@ void receive_ACK(int token, int N) {
   // Consome primeira mensagem na lista, que foi incluida primeiro
   ProcessMessage *msg = retrieve_msg(token);
   printf("ACK recebido pelo processo %d do processo %d\n", token, msg->sender);
+  // atualiza lista de ACKs pendentes
   difusion[token].pendingACK[msg->sender] = false;
+  // imprime lista de ACKs pendentes
   print_pending(N, token);
+  // caso nao haja mais ACKs pendentes, retorna ACKs para processos que estao aguardando
   if (!any_pending(token, N)) {
     for (int i = 0; i < N; ++i) {
       if (difusion[i].pendingACK[token]) {
@@ -255,6 +270,7 @@ void receive_ACK(int token, int N) {
       }
     }
   }
+  // se for ultimo ACK recebido pela origem, broadcast completo
   if (token == source && !any_pending(token, N)) {
     printf("Ultimo ACK recebido! Transmissao completa!\n");
   }
@@ -296,25 +312,30 @@ void deliver(int token) {
 }
 
 void user_input(int *N, int *N_faults, int argc, char *argv[]) {
+  // verifica numero de entradas correto
   if (argc != 3 && argc != 4) {
     puts("Uso correto: bebcast <fonte do broadcast> <numero de processos> "
          "<lista de falhas opcional (#,#:#)>");
     exit(1);
   }
 
-  source = atoi(argv[1]);
-  *N = atoi(argv[2]);
+  source = atoi(argv[1]); // origem
+  *N = atoi(argv[2]); // numero de processos
+  // caso 4 argumentos, constroi lista de falhas
   if (argc == 4) {
     if (strcmp(argv[3], "R") == 0) {
+      // randomico
       if (randomize())
         fprintf(stderr,
                 "Warning: Could not find any sources for randomness.\n");
       build_random(*N, N_faults);
     } else {
+      // definido pela entrada do usuario
       build_faults(argv[3], *N, N_faults);
     }
   }
 
+  // validacoes das entradas
   if (source >= *N) {
     printf("O processo fonte %d (F) deve estar dentro do numero de processos "
            "%d (N)! [F < N]\n",
@@ -338,7 +359,9 @@ void user_input(int *N, int *N_faults, int argc, char *argv[]) {
 
 void build_faults(char *faults, int N, int *N_faults) {
   int ent = 0;
+  // numero de falhas a partir de quantos processos existem na entrada do usuario
   *N_faults = occurrences(faults, ',') + 1;
+  // processa cada entrada da lista separada por virgula
   char **semiresult = malloc(sizeof(char *) * (*N_faults));
   char *token = strtok(faults, ",");
   while (token != NULL) {
@@ -348,10 +371,12 @@ void build_faults(char *faults, int N, int *N_faults) {
   }
   free(token);
 
+  // constroi falhas com cada entrada da lista
   fault = malloc(sizeof(Fault) * (*N_faults));
   for (int i = 0; i < *N_faults; i++) {
     int number_tokens = occurrences(semiresult[i], ':') + 1;
     if (number_tokens == 1) {
+      // se for apenas o processo, falha no decorrer da simulacao
       fault[i].id = atoi(semiresult[i]);
       fault[i].failed = false;
       if (fault[i].id == 0 && semiresult[i][0] != '0') {
@@ -359,6 +384,9 @@ void build_faults(char *faults, int N, int *N_faults) {
         exit(1);
       }
     } else {
+      // caso contrario, se o complemento for 
+      // 0, falha no decorrer da simulacao
+      // 1, inicia falho
       char *token2 = strtok(semiresult[i], ":");
       ent = 0;
       while (token2 != NULL) {
